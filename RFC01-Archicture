@@ -1,0 +1,126 @@
+# Guia de Estrutura e Fluxo da Aplicação
+
+Este documento serve como referência para novos desenvolvedores entenderem **o propósito de cada camada e arquivo**, assim como **o fluxo de execução** típico na aplicação.
+
+
+---
+
+## 📌 Camadas e Responsabilidades
+
+### 1. `cmd/main.go`
+
+* **Ponto de entrada** da aplicação.
+* Deve inicializar:
+
+  * Configurações gerais (variáveis de ambiente, conexões de DB, etc.).
+  * Instâncias de repositórios e EventBus.
+  * Serviços de aplicação.
+  * Roteador HTTP.
+* Exemplo minimal:
+
+  ```go
+  func main() {
+    cfg := config.Load()
+    repo := infrastructure.NewMongoUserRepo(cfg.Mongo)
+    eventBus := infrastructure.NewEventBus()
+    userSvc := application.NewUserService(repo, eventBus)
+    httpHandler := interfaces.NewUserHandler(userSvc)
+    router := interfaces.NewRouter(httpHandler)
+    http.ListenAndServe(cfg.Port, router)
+  }
+  ```
+
+### 2. `internal/domain/shared`
+
+Contém código compartilhado entre diferentes entidades, como eventos de domínio, identificadores, e funções utilitárias.	
+
+
+### 3. `internal/domain/[entity]`
+
+Contém **lógica de negócio pura** e **definições de contrato** sem dependências de infraestrutura referente aquela entidade.
+
+* **`[entity].go`**
+
+  * Struct definindo os atributos da entidade/agregado e entidades embutidas `User`, `CoinStatus`, `NFT`, etc.
+  * Construtores (funções `NewUser`, `NewTokenStats`, `NewNFT`, etc.).
+  * Métodos embutidos que alteram estado (ex: `EarnCoins`, `TransferTokens`, `ReceiveTokens`).
+  * Caso necessário pode-se criar mais de um arquivo para separar entidades embutidas (ex: `user.go`, `coin_status.go`, `nft.go`).
+  * **Não faz** leitura de DB, HTTP, ou outros detalhes de infra.
+
+* **`commands.go`**
+
+  * Define **ações**/comandos que operam sobre entidades (por ex: `func (u *User) TransferTokens(...)`).
+  * Deve ser de responsabilidade do comando validar os dados de entrada (ex: `amount > 0`, `from != to`, etc.).
+  * Deve ser de responsabilidade do comando alterar o estado da entidade (ex: `u.Balance -= amount`, `u.NFTs = append(u.NFTs, nft)`).
+  * **Não** deve fazer chamadas a repositórios ou serviços externos.
+  * Inclui lógica de domínio e disparo de eventos de domínio.
+  * Cada ação deve ser um método de `User` ou outra entidade relevante.
+  * Cada ação deve retornar um evento de domínio (ex: `TokensTransferred`).
+
+* **`events.go`**
+
+  * Tipos de **DomainEvent** para cada ação relevante (ex: `TokensTransferred`, `TokensReceived`).
+  * Cada struct implementa `EventType()`.
+  * Cada evento deve conter os dados relevantes para a ação.
+
+* **`errors.go`**
+
+  * Definições de erros específicos do domínio: `ErrInsufficientBalance`, etc.
+
+* **`repository.go`**
+
+  * Interface `Repository` com métodos de persistência: `FindByID`, `Save`, etc.
+  * **Não** contém implementações concretas.
+
+### 4. `internal/application/shared`
+
+Contém código compartilhado entre diferentes serviços de aplicação, como middlewares, helpers, etc.
+
+* **`error_middleware.go`**
+
+  * Middleware para capturar erros lançados pelos **services** e transformar em respostas HTTP (códigos, mensagens JSON).
+
+### 4. `internal/application/[entity]/service/[service_name]`
+
+Contém **serviços de aplicação** que orquestram a lógica de negócio e interagem com repositórios. Exemplo ao fazer transferência de tokens eu preciso buscar o usuário remetente e destinatário  e então chamar os métodos de domínio para transferir os tokens e receber os tokens. A objetivo é separar a lógica de negócio pura (domínio) da lógica de aplicação (orquestração, validação, etc.).
+
+### 6. `internal/interfaces/http ou web3/controller/[entity]`
+
+* **`handler.go`**
+
+  * HTTP Handlers: decodifica JSON do request, chama o service apropriado e retorna status + payload.
+
+* **`dto.go`**
+
+  * Structs de **Data Transfer Object** para requests e responses (ex: `TransferCoinsRequest`, `UserResponse`).
+
+* **`router.go`**
+
+  * Mapeia rotas para handlers (`POST /users/transfer` → `userHandler.TransferCoins`).
+
+### 7. `internal/infrastructure`
+
+* **`db/*.go`**
+
+  * Implementação dos repositórios da aplicação, conexões com bancos de dados, etc.	
+
+---
+
+## 🚀 Exemplo Fluxo de uma Requisição de Transferência
+
+1. **Cliente** faz `POST /users/transfer` com payload `{ from_id, to_id, amount }`.
+2. **Handler HTTP** (`interfaces/http/controller/user/handler.go`) decodifica o request para `TransferCoinsRequest` e chama `UserService.TransferCoins(ctx, fromID, toID, amount)`.
+3. **Service de Aplicação** (`internal/application/user/transfer_coins.go`):
+
+   * Busca `sender` e `receiver` via `UserRepository`.
+   * Invoca `sender.TransferTokens(to, amount)` (Domain).
+   * Invoca `receiver.ReceiveTokens(amount)` (Domain).
+   * Persiste ambos os usuários via `repo.Save`.
+   * Publica evento no `EventBus`.
+4. **Domain** (`internal/domain/user`) executa lógica de negócio e dispara `DomainEvent`.
+5. **Handlers**  propagam o evento a subscribers (por ex: indexadores, integradores de blockchain, logs).
+6. **HTTP Handler** retorna `204 No Content`.
+
+---
+
+> **Siga este padrão** para novos módulos: defina domínio puro, casos de uso em application, handlers em interfaces.
