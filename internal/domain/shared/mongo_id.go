@@ -6,12 +6,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// GenerateMongoID gera um novo ObjectID aleatório para ser usado como ID
+// GenerateMongoID generates a new random ObjectID to be used as the ID
 func NewMongoID() primitive.ObjectID {
 	return primitive.NewObjectID()
 }
 
-// ObjectIDFromString converte uma string para um ObjectID
+// ObjectIDFromString converts a string to an ObjectID
 func ObjectIDFromString(s string) (primitive.ObjectID, error) {
 	objectID, err := primitive.ObjectIDFromHex(s)
 	if err != nil {
@@ -21,7 +21,7 @@ func ObjectIDFromString(s string) (primitive.ObjectID, error) {
 	return objectID, nil
 }
 
-// ObjectIDToString converte um ObjectID para uma string, se o ObjectID for vazio, retorna uma string vazia
+// ObjectIDToString converts an ObjectID to a string, if the ObjectID is empty, returns an empty string
 func ObjectIDToString(o primitive.ObjectID) string {
 	return o.Hex()
 }

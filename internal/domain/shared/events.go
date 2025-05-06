@@ -8,51 +8,47 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// DomainEvent define a interface que todos os eventos devem implementar
+// DomainEvent defines the interface that all events must implement
 type DomainEvent interface {
 	EventType() string
 }
 
-// BaseEvent contém os campos comuns a todos os eventos
+// BaseEvent contains fields common to all events
 type BaseEvent struct {
 	ID        primitive.ObjectID
-	AggID     primitive.ObjectID
 	Timestamp time.Time
 }
 
-// NewBaseEvent cria um novo evento base
 func NewBaseEvent(aggID primitive.ObjectID) BaseEvent {
 	return BaseEvent{
 		ID:        NewMongoID(),
-		AggID:     aggID,
 		Timestamp: time.Now(),
 	}
 }
 
-// EventHandler define uma função que manipula eventos
+// EventHandler defines a function that handles events
 type EventHandler func(context.Context, DomainEvent)
 
-// EventBus gerencia a publicação e escuta de eventos de domínio
+// EventBus manages publishing and listening of domain events
 type EventBus struct {
 	handlers map[string][]EventHandler
 	mu       sync.RWMutex
 }
 
-// NewEventBus cria uma nova instância de EventBus
 func NewEventBus() *EventBus {
 	return &EventBus{
 		handlers: make(map[string][]EventHandler),
 	}
 }
 
-// Subscribe adiciona um handler para um tipo específico de evento
+// Subscribe adds a handler for a specific type of event
 func (eb *EventBus) Subscribe(eventType string, handler EventHandler) {
 	eb.mu.Lock()
 	defer eb.mu.Unlock()
 	eb.handlers[eventType] = append(eb.handlers[eventType], handler)
 }
 
-// Publish dispara um evento para os handlers registrados
+// Publish triggers an event to registered handlers
 func (eb *EventBus) Publish(ctx context.Context, event DomainEvent) {
 	eb.mu.RLock()
 	defer eb.mu.RUnlock()

@@ -4,7 +4,7 @@ func (u *User) EarnCoins(amount uint64) {
 	u.CoinStatus.EarnedByActions += amount
 }
 
-// Deduz o valor transferido do saldo total, priorizando o saldo transferido e depois o saldo ganho por ações
+// Deducts the transferred amount from the total balance, prioritizing the transferred balance and then the balance earned by shares
 func (u *User) TransferTokens(amount uint64) error {
 	totalBalance := u.CoinStatus.EarnedByTransfer + u.CoinStatus.EarnedByActions
 	if totalBalance < amount {
