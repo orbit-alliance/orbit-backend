@@ -36,7 +36,6 @@ type NFTMetadata struct {
 	Expiry *time.Time `json:"expiry" bson:"expiry"`
 }
 
-// Função para criar uma nova instância de User
 func NewUser(id42, wallet, username string, coinStatus CoinStatus, nfts []NFT) *User {
 	return &User{
 		ID42:       id42,
@@ -48,7 +47,6 @@ func NewUser(id42, wallet, username string, coinStatus CoinStatus, nfts []NFT) *
 	}
 }
 
-// Função para criar uma nova instância de CoinStatus
 func NewCoinStatus(earnedByActions, earnedByTransfer, transferred, used uint64) *CoinStatus {
 	return &CoinStatus{
 		EarnedByActions:  earnedByActions,
@@ -58,7 +56,6 @@ func NewCoinStatus(earnedByActions, earnedByTransfer, transferred, used uint64) 
 	}
 }
 
-// Função para criar uma nova instância de NFT
 func NewNFT(id, name string, metadata NFTMetadata) *NFT {
 	return &NFT{
 		ID:        id,
@@ -68,7 +65,6 @@ func NewNFT(id, name string, metadata NFTMetadata) *NFT {
 	}
 }
 
-// Função para criar uma nova instância de NFTMetadata
 func NewNFTMetadata(title, image string, expiry *time.Time) *NFTMetadata {
 	return &NFTMetadata{
 		Title:  title,
