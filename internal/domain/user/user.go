@@ -1,14 +1,19 @@
 package user
 
-import "time"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type User struct {
-	ID42       string     `json:"id_42" bson:"id_42"`
-	Wallet     string     `json:"wallet" bson:"wallet"`
-	Username   string     `json:"username" bson:"username"`
-	CoinStatus CoinStatus `json:"coin_status" bson:"coin_status"`
-	NFTs       []NFT      `json:"nfts" bson:"nfts"`
-	CreatedAt  time.Time  `json:"created_at" bson:"created_at"`
+	ID         primitive.ObjectID `json:"id" bson:"id"`
+	ID42       string             `json:"id_42" bson:"id_42"`
+	Wallet     string             `json:"wallet" bson:"wallet"`
+	Username   string             `json:"username" bson:"username"`
+	CoinStatus CoinStatus         `json:"coin_status" bson:"coin_status"`
+	NFTs       []NFT              `json:"nfts" bson:"nfts"`
+	CreatedAt  time.Time          `json:"created_at" bson:"created_at"`
 }
 
 type CoinStatus struct {
@@ -32,8 +37,8 @@ type NFTMetadata struct {
 }
 
 // Função para criar uma nova instância de User
-func NewUser(id42, wallet, username string, coinStatus CoinStatus, nfts []NFT) User {
-	return User{
+func NewUser(id42, wallet, username string, coinStatus CoinStatus, nfts []NFT) *User {
+	return &User{
 		ID42:       id42,
 		Wallet:     wallet,
 		Username:   username,
@@ -44,8 +49,8 @@ func NewUser(id42, wallet, username string, coinStatus CoinStatus, nfts []NFT) U
 }
 
 // Função para criar uma nova instância de CoinStatus
-func NewCoinStatus(earnedByActions, earnedByTransfer, transferred, used uint64) CoinStatus {
-	return CoinStatus{
+func NewCoinStatus(earnedByActions, earnedByTransfer, transferred, used uint64) *CoinStatus {
+	return &CoinStatus{
 		EarnedByActions:  earnedByActions,
 		EarnedByTransfer: earnedByTransfer,
 		Transferred:      transferred,
@@ -54,8 +59,8 @@ func NewCoinStatus(earnedByActions, earnedByTransfer, transferred, used uint64) 
 }
 
 // Função para criar uma nova instância de NFT
-func NewNFT(id, name string, metadata NFTMetadata) NFT {
-	return NFT{
+func NewNFT(id, name string, metadata NFTMetadata) *NFT {
+	return &NFT{
 		ID:        id,
 		Name:      name,
 		CreatedAt: time.Now(),
@@ -64,8 +69,8 @@ func NewNFT(id, name string, metadata NFTMetadata) NFT {
 }
 
 // Função para criar uma nova instância de NFTMetadata
-func NewNFTMetadata(title, image string, expiry *time.Time) NFTMetadata {
-	return NFTMetadata{
+func NewNFTMetadata(title, image string, expiry *time.Time) *NFTMetadata {
+	return &NFTMetadata{
 		Title:  title,
 		Image:  image,
 		Expiry: expiry,
