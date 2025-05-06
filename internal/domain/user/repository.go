@@ -1,4 +1,4 @@
 package user
 
-type UserRepository interface {
+type Repository interface {
 }
