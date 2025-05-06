@@ -6,12 +6,12 @@ type User struct {
 	ID42       string     `json:"id_42" bson:"id_42"`
 	Wallet     string     `json:"wallet" bson:"wallet"`
 	Username   string     `json:"username" bson:"username"`
-	TokenStats TokenStats `json:"token_stats" bson:"token_stats"`
+	CoinStatus CoinStatus `json:"coin_status" bson:"coin_status"`
 	NFTs       []NFT      `json:"nfts" bson:"nfts"`
 	CreatedAt  time.Time  `json:"created_at" bson:"created_at"`
 }
 
-type TokenStats struct {
+type CoinStatus struct {
 	EarnedByActions  uint64 `json:"earned_by_actions" bson:"earned_by_actions"`
 	EarnedByTransfer uint64 `json:"earned_by_transfer" bson:"earned_by_transfer"`
 	Transferred      uint64 `json:"transferred" bson:"transferred"`
@@ -29,4 +29,45 @@ type NFTMetadata struct {
 	Title  string     `json:"title" bson:"title"`
 	Image  string     `json:"image" bson:"image"`
 	Expiry *time.Time `json:"expiry" bson:"expiry"`
+}
+
+// Função para criar uma nova instância de User
+func NewUser(id42, wallet, username string, coinStatus CoinStatus, nfts []NFT) User {
+	return User{
+		ID42:       id42,
+		Wallet:     wallet,
+		Username:   username,
+		CoinStatus: coinStatus,
+		NFTs:       nfts,
+		CreatedAt:  time.Now(),
+	}
+}
+
+// Função para criar uma nova instância de CoinStatus
+func NewCoinStatus(earnedByActions, earnedByTransfer, transferred, used uint64) CoinStatus {
+	return CoinStatus{
+		EarnedByActions:  earnedByActions,
+		EarnedByTransfer: earnedByTransfer,
+		Transferred:      transferred,
+		Used:             used,
+	}
+}
+
+// Função para criar uma nova instância de NFT
+func NewNFT(id, name string, metadata NFTMetadata) NFT {
+	return NFT{
+		ID:        id,
+		Name:      name,
+		CreatedAt: time.Now(),
+		Metadata:  metadata,
+	}
+}
+
+// Função para criar uma nova instância de NFTMetadata
+func NewNFTMetadata(title, image string, expiry *time.Time) NFTMetadata {
+	return NFTMetadata{
+		Title:  title,
+		Image:  image,
+		Expiry: expiry,
+	}
 }
