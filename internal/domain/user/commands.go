@@ -5,10 +5,10 @@ func (u *User) EarnCoins(amount uint64) {
 }
 
 // Deducts the transferred amount from the total balance, prioritizing the transferred balance and then the balance earned by shares
-func (u *User) TransferTokens(amount uint64) error {
+func (u *User) TransferTokens(amount uint64) (*TransferedCoins, error) {
 	totalBalance := u.CoinStatus.EarnedByTransfer + u.CoinStatus.EarnedByActions
 	if totalBalance < amount {
-		return ErrInsufficientBalance
+		return nil, ErrInsufficientBalance
 	}
 
 	u.CoinStatus.Transferred += amount
@@ -19,11 +19,7 @@ func (u *User) TransferTokens(amount uint64) error {
 	remaining := amount - transferUsed
 	u.CoinStatus.EarnedByActions -= remaining
 
-	return nil
-}
-
-func (u *User) ReceiveTokens(amount uint64) {
-	u.CoinStatus.EarnedByTransfer += amount
+	return NewTransferedCoins(u, u, amount), nil
 }
 
 func min(a, b uint64) uint64 {
