@@ -1,0 +1,30 @@
+package user_benefit_purchase
+
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+type Status uint8
+
+const (
+	PENDING Status = iota
+	APPROVED
+	DELIVERED
+	REJECTED
+)
+
+type UserBenefitPurchase struct {
+	ID                   primitive.ObjectID `json:"id" bson:"id"`
+	UserID               string             `json:"user_id" bson:"user_id"`
+	Username             string             `json:"username" bson:"username"`
+	BenefitID            primitive.ObjectID `json:"benefit_id" bson:"benefit_id"`
+	BenefitName          string             `json:"benefit_name" bson:"benefit_name"`
+	EarnedCoinsUsed      uint64             `json:"earned_coins_used" bson:"earned_coins_used"`
+	TransferredCoinsUsed uint64             `json:"transferred_coins_used" bson:"transferred_coins_used"`
+	PurchaseStatus       Status             `json:"purchase_status" bson:"purchase_status"`
+	CreatedAt            time.Time          `json:"created_at" bson:"created_at"`
+	RequestedAt          time.Time          `json:"requested_at" bson:"requested_at"`
+	UpdatedAt            time.Time          `json:"updated_at" bson:"updated_at"`
+}
