@@ -13,3 +13,14 @@ type GoodAction struct {
 	AllowedNFTTypes []nft.NFT          `json:"allowed_nft_types" bson:"allowed_nft_types"`
 	BlockedNFTTypes []nft.NFT          `json:"blocked_nft_types" bson:"blocked_nft_types"`
 }
+
+func NewGoodAction(name, description string, rewardAmount uint64, allowedNFTTypes, blockedNFTTypes []nft.NFT) *GoodAction {
+	return &GoodAction{
+		ID:              primitive.NewObjectID(),
+		Name:            name,
+		Description:     description,
+		RewardAmount:    rewardAmount,
+		AllowedNFTTypes: allowedNFTTypes,
+		BlockedNFTTypes: blockedNFTTypes,
+	}
+}

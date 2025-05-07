@@ -12,6 +12,16 @@ type UserGoodAction struct {
 	Username    string             `json:"username" bson:"username"`
 	ActionId    string             `json:"action_id" bson:"action_id"`
 	ActionName  string             `json:"action_name" bson:"action_name"`
-	CreatedAt   time.Time          `json:"created_at" bson:"created_at"`
 	PerformedAt time.Time          `json:"performed_at" bson:"performed_at"`
+}
+
+func NewUserGoodAction(userId, username, actionId, actionName string) *UserGoodAction {
+	return &UserGoodAction{
+		ID:          primitive.NewObjectID(),
+		UserId:      userId,
+		Username:    username,
+		ActionId:    actionId,
+		ActionName:  actionName,
+		PerformedAt: time.Now(),
+	}
 }

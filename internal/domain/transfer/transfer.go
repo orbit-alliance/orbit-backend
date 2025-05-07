@@ -15,3 +15,15 @@ type Transfer struct {
 	Amount       uint64             `json:"amount" bson:"amount"`
 	PerformedAt  time.Time          `json:"created_at" bson:"created_at"`
 }
+
+func NewTransfer(fromUserID, fromUsername, toUserID, toUsername string, amount uint64) *Transfer {
+	return &Transfer{
+		ID:           primitive.NewObjectID(),
+		FromUserID:   fromUserID,
+		FromUsername: fromUsername,
+		ToUserID:     toUserID,
+		ToUsername:   toUsername,
+		Amount:       amount,
+		PerformedAt:  time.Now(),
+	}
+}

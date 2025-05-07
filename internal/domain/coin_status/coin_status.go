@@ -10,3 +10,12 @@ type CoinStatus struct {
 	EarnedByTransfer uint64             `json:"earned_by_transfer" bson:"earned_by_transfer"`
 	Transferred      uint64             `json:"transferred" bson:"transferred"`
 }
+
+func NewCoinStatus(earnedByActions, earnedByTransfer, transferred uint64) *CoinStatus {
+	return &CoinStatus{
+		ID:               primitive.NewObjectID(),
+		EarnedByActions:  earnedByActions,
+		EarnedByTransfer: earnedByTransfer,
+		Transferred:      transferred,
+	}
+}

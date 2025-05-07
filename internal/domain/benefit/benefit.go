@@ -17,3 +17,17 @@ type Benefit struct {
 	BlockedNFTTypes []nft.NFT          `json:"blocked_nft_types" bson:"blocked_nft_types"`
 	CreatedAt       string             `json:"created_at" bson:"created_at"` //Added
 }
+
+func NewBenefit(name, description string, earnedCost, transferredCost, totalAvailable, maxPerUser uint64, allowedNFTTypes, blockedNFTTypes []nft.NFT) *Benefit {
+	return &Benefit{
+		ID:              primitive.NewObjectID(),
+		Name:            name,
+		Description:     description,
+		EarnedCost:      earnedCost,
+		TransferredCost: transferredCost,
+		TotalAvailable:  totalAvailable,
+		MaxPerUser:      maxPerUser,
+		AllowedNFTTypes: allowedNFTTypes,
+		BlockedNFTTypes: blockedNFTTypes,
+	}
+}
