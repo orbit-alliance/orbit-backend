@@ -1,6 +1,8 @@
 package coin
 
 import (
+	"time"
+
 	"github.com/orbit-alliance/orbit-backend/internal/domain/nft"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -15,7 +17,7 @@ type Benefit struct {
 	MaxPerUser      uint64             `json:"max_per_user" bson:"max_per_user"`
 	AllowedNFTTypes []nft.NFT          `json:"allowed_nft_types" bson:"allowed_nft_types"`
 	BlockedNFTTypes []nft.NFT          `json:"blocked_nft_types" bson:"blocked_nft_types"`
-	CreatedAt       string             `json:"created_at" bson:"created_at"` //Added
+	CreatedAt       time.Time          `json:"created_at" bson:"created_at"` //Added
 }
 
 func NewBenefit(name, description string, earnedCost, transferredCost, totalAvailable, maxPerUser uint64, allowedNFTTypes, blockedNFTTypes []nft.NFT) *Benefit {
