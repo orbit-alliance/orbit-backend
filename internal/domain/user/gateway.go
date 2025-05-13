@@ -1,6 +1,15 @@
 package user
 
+type UserProjectBonusDTO struct {
+	ProjectName string
+	Points      int
+}
+
+type UserLoggedDaysDTO struct {
+	Date string
+}
+
 type Gateway interface {
-	GetRetroativeBonusProject(userID string) (map[string]int)
-	GetRetroativeLoggedDays(userID string, startAt string) (map[string]string)
+	GetRetroativeBonusProject(userID string) ([]UserProjectBonusDTO, error)
+	GetRetroativeLoggedDays(userID string, startAt string) ([]UserLoggedDaysDTO, error)
 }
