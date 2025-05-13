@@ -31,6 +31,7 @@ Critérios
 - O multiplicador de frequência (streak) será ativado para cadetes que mantiverem presença contínua no campus.
 - Se o cadete faltar um único dia, o streak é perdido e reinicia do zero.`,
 			1,
+			nil,
 			[]nft.NFT{},
 			[]nft.NFT{},
 		),
@@ -49,6 +50,7 @@ Critérios
 - A quantidade de Galactos concedidos varia de acordo com o projeto e sua pontuação.
 - O pagamento dos Galactos será automático, assim que a intra registrar a conclusão do bônus.`,
 			25,
+			nil,
 			[]nft.NFT{},
 			[]nft.NFT{},
 		),
@@ -73,6 +75,43 @@ Critérios
 Recompensa
 15₲ por participação validada em um Talk.`,
 			15,
+			nil,
+			[]nft.NFT{},
+			[]nft.NFT{},
+		),
+		coin.NewGoodAction(
+			"26 dias Consecutivos de Presença",
+			`Objetivo
+A ação 26 dias consecutivos de presença tem como objetivo incentivar os cadetes a manterem uma rotina de frequência regular no campus da 42 Rio. A presença contínua é fundamental para o aprendizado colaborativo e para o fortalecimento da comunidade acadêmica.
+Organização
+Para garantir a participação ativa dos cadetes, será implementado um sistema de registro de presença. A validação será feita de forma automática, garantindo que apenas cadetes presentes no campus recebam a recompensa.
+Critérios
+- O sistema será programado para validar automaticamente a frequência dos cadetes.
+- Presença obrigatória no campus por 26 dias consecutivos.
+- O sistema de multiplicador de frequência (streak) será ativado para cadetes que mantiverem presença contínua no campus.
+- Se o cadete faltar um único dia, o streak é perdido e reinicia do zero.
+Recompensa
+- 100₲ por manter 26 dias consecutivos de presença no campus.`,
+			100,
+			nil,
+			[]nft.NFT{},
+			[]nft.NFT{},
+		),
+		coin.NewGoodAction(
+			"42 dias Consecutivos de Presença",
+			`Objetivo
+A ação 42 dias consecutivos de presença tem como objetivo incentivar os cadetes a manterem uma rotina de frequência regular no campus da 42 Rio. A presença contínua é fundamental para o aprendizado colaborativo e para o fortalecimento da comunidade acadêmica.
+Organização
+Para garantir a participação ativa dos cadetes, será implementado um sistema de registro de presença. A validação será feita de forma automática, garantindo que apenas cadetes presentes no campus recebam a recompensa.
+Critérios
+- O sistema será programado para validar automaticamente a frequência dos cadetes.
+- Presença obrigatória no campus por 42 dias consecutivos.
+- O sistema de multiplicador de frequência (streak) será ativado para cadetes que mantiverem presença contínua no campus.
+- Se o cadete faltar um único dia, o streak é perdido e reinicia do zero.
+Recompensa
+- 150₲ por manter 42 dias consecutivos de presença no campus.`,
+			150,
+			nil,
 			[]nft.NFT{},
 			[]nft.NFT{},
 		),
