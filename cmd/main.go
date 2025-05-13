@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -21,5 +22,8 @@ func main() {
 
 	db.InitMongoDB()
 	defer db.CloseMongoDB()
+
+	goodActionRepo := db.NewGoodActionRepository(db.Database)
+	db.SeedGoodActions(context.TODO(), goodActionRepo)
 
 }
