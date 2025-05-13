@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-func GetToken() (string, error) {
+func getToken() (string, error) {
 	clientID := os.Getenv("CLIENT_ID_42")
 	clientSecret := os.Getenv("CLIENT_SECRET_42")
 
@@ -39,7 +39,7 @@ func GetToken() (string, error) {
 		return "", errors.New("Error fetching token: " + resp.Status)
 	}
 
-	var data TokenResponse
+	var data tokenResponse
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return "", err
 	}

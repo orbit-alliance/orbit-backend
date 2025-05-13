@@ -6,8 +6,8 @@ import (
 	"net/http"
 )
 
-func GetUserByID(userID, token string) (UserResponse, error) {
-	var data UserResponse
+func getUserByID(userID, token string) (userResponse, error) {
+	var data userResponse
 	url := fmt.Sprintf("https://api.intra.42.fr/v2/users/%s", userID)
 
 	req, err := http.NewRequest("GET", url, nil)

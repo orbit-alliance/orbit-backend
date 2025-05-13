@@ -2,7 +2,7 @@ package gateway_42
 
 import "time"
 
-type ImageUserResponse struct {
+type imageUserResponse struct {
 	Link     string `json:"link"`
 	Versions struct {
 		Large  string `json:"large"`
@@ -12,7 +12,7 @@ type ImageUserResponse struct {
 	} `json:"versions"`
 }
 
-type ProjectsUsersResponse struct {
+type projectsUsersResponse struct {
 	ID            int    `json:"id"`
 	Occurrence    int    `json:"occurrence"`
 	FinalMark     int    `json:"final_mark"`
@@ -33,7 +33,7 @@ type ProjectsUsersResponse struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-type AchievementsUserResponse struct {
+type achievementsUserResponse struct {
 	ID           int    `json:"id"`
 	Name         string `json:"name"`
 	Description  string `json:"description"`
@@ -45,7 +45,7 @@ type AchievementsUserResponse struct {
 	UsersURL     string `json:"users_url"`
 }
 
-type UserResponse struct {
+type userResponse struct {
 	ID              int                        `json:"id"`
 	Email           string                     `json:"email"`
 	Login           string                     `json:"login"`
@@ -57,7 +57,7 @@ type UserResponse struct {
 	Phone           string                     `json:"phone"`
 	Displayname     string                     `json:"displayname"`
 	Kind            string                     `json:"kind"`
-	Image           ImageUserResponse          `json:"image"`
+	Image           imageUserResponse          `json:"image"`
 	Staff           bool                       `json:"staff?"`
 	CorrectionPoint int                        `json:"correction_point"`
 	PoolMonth       string                     `json:"pool_month"`
@@ -73,8 +73,8 @@ type UserResponse struct {
 	Active          bool                       `json:"active?"`
 	Groups          []any                      `json:"groups"`
 	CursusUsers     []any                      `json:"cursus_users"`
-	ProjectsUsers   []ProjectsUsersResponse    `json:"projects_users"`
-	Achievements    []AchievementsUserResponse `json:"achievements"`
+	ProjectsUsers   []projectsUsersResponse    `json:"projects_users"`
+	Achievements    []achievementsUserResponse `json:"achievements"`
 	Titles          []struct {
 		ID   int    `json:"id"`
 		Name string `json:"name"`

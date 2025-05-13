@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func GetLocationByUserID(startAt, endAt, userID, token string) (LocationResponse, error) {
+func getLocationByUserID(startAt, endAt, userID, token string) (locationResponse, error) {
 	url := fmt.Sprintf("https://api.intra.42.fr/v2/users/%s/locations_stats?begin_at=%s&end_at=%s", userID, startAt, endAt)
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -32,7 +32,7 @@ func GetLocationByUserID(startAt, endAt, userID, token string) (LocationResponse
 		return nil, err
 	}
 
-	var data LocationResponse
+	var data locationResponse
 	if err := json.Unmarshal(body, &data); err != nil {
 		return nil, err
 	}

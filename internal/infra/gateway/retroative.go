@@ -7,10 +7,10 @@ import (
 )
 
 func GetRetroativeBonusProject(userID string) ([]user.UserProjectBonusDTO, error) {
-	token, err := GetToken()
+	token, err := getToken()
 
 	bonusList := []user.UserProjectBonusDTO{}
-	apiData, err := GetUserByID(userID, token)
+	apiData, err := getUserByID(userID, token)
 
 	if err != nil {
 		return nil, ErrFailToGetUserIn42
@@ -29,7 +29,7 @@ func GetRetroativeBonusProject(userID string) ([]user.UserProjectBonusDTO, error
 }
 
 func GetRetroativeLoggedDays(userID string, startAt string) ([]user.UserLoggedDaysDTO, error) {
-	token, err := GetToken()
+	token, err := getToken()
 	endAt := time.Now().UTC().Format(time.RFC3339Nano)
 	dayList := []user.UserLoggedDaysDTO{}
 
@@ -37,7 +37,7 @@ func GetRetroativeLoggedDays(userID string, startAt string) ([]user.UserLoggedDa
 		return nil, ErrFailToCreate42Token
 	}
 
-	apiData, err := GetLocationByUserID(startAt, endAt, userID, token)
+	apiData, err := getLocationByUserID(startAt, endAt, userID, token)
 
 	if err != nil {
 		return nil, ErrFailToGetLocationIn42
