@@ -27,6 +27,8 @@ func getUserByID(userID, token string) (userResponse, error) {
 		return data, fmt.Errorf("error fetching token: %s", resp.Status)
 	}
 
-	json.NewDecoder(resp.Body).Decode(&data)
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		return data, fmt.Errorf("error decoding JSON response: %w", err)
+	}
 	return data, nil
 }
