@@ -6,7 +6,7 @@ import (
 	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
 )
 
-func GetRetroativeBonusProject(userID string) ([]user.UserProjectBonusDTO, error) {
+func (r *Gateway42) GetRetroativeBonusProject(userID string) ([]user.UserProjectBonusDTO, error) {
 	token, err := getToken()
 
 	bonusList := []user.UserProjectBonusDTO{}
@@ -28,7 +28,7 @@ func GetRetroativeBonusProject(userID string) ([]user.UserProjectBonusDTO, error
 	return bonusList, nil
 }
 
-func GetRetroativeLoggedDays(userID string, startAt string) ([]user.UserLoggedDaysDTO, error) {
+func (r *Gateway42) GetRetroativeLoggedDays(userID string, startAt string) ([]user.UserLoggedDaysDTO, error) {
 	token, err := getToken()
 	endAt := time.Now().UTC().Format(time.RFC3339Nano)
 	dayList := []user.UserLoggedDaysDTO{}
