@@ -8,6 +8,9 @@ import (
 
 func (r *Gateway42) GetRetroativeBonusProject(userID string) ([]user.UserProjectBonusDTO, error) {
 	token, err := getToken()
+	if err != nil {
+		return nil, ErrFailToCreate42Token
+	}
 
 	bonusList := []user.UserProjectBonusDTO{}
 	apiData, err := getUserByID(userID, token)
