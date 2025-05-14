@@ -10,6 +10,6 @@ type UserLoggedDaysDTO struct {
 }
 
 type Gateway interface {
-	GetRetroativeBonusProject(userID string) ([]UserProjectBonusDTO, error)
-	GetRetroativeLoggedDays(userID string, startAt string) ([]UserLoggedDaysDTO, error)
+	GetRetroactiveBonusProject(userID string) ([]UserProjectBonusDTO, error)
+	GetRetroactiveLoggedDays(userID string, startAt string) ([]UserLoggedDaysDTO, error)
 }
