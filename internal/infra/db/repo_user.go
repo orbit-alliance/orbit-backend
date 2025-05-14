@@ -50,7 +50,7 @@ func (r *UserRepository) FindByID(ctx context.Context, id string) (*user.User, e
 }
 
 func (r *UserRepository) FindByID42(ctx context.Context, id42 string) (*user.User, error) {
-	filter := bson.M{"_id_42": id42}
+	filter := bson.M{"id_42": id42}
 	var user user.User
 	err := r.collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
@@ -63,7 +63,7 @@ func (r *UserRepository) FindByID42(ctx context.Context, id42 string) (*user.Use
 }
 
 func (r *UserRepository) FindByWallet(ctx context.Context, wallet string) (*user.User, error) {
-	filter := bson.M{"_wallet": wallet}
+	filter := bson.M{"wallet": wallet}
 	var user user.User
 	err := r.collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
@@ -76,7 +76,7 @@ func (r *UserRepository) FindByWallet(ctx context.Context, wallet string) (*user
 }
 
 func (r *UserRepository) FindByUsername(ctx context.Context, username string) (*user.User, error) {
-	filter := bson.M{"_username": username}
+	filter := bson.M{"username": username}
 	var user user.User
 	err := r.collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
