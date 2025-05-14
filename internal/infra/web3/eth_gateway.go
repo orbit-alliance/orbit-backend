@@ -31,7 +31,7 @@ func NewEthGateway(chainID int64) (*EthGateway, error) {
 		return nil, err
 	}
 
-	auth, err := bind.NewTransactorWithChainID(strings.NewReader(privateKey), "", big.NewInt(chainID)) // ou sua chain ID
+	auth, err := bind.NewTransactorWithChainID(strings.NewReader(privateKey), "", big.NewInt(chainID))
 	if err != nil {
 		return nil, err
 	}
