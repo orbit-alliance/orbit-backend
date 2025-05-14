@@ -17,13 +17,24 @@ type UserGoodAction struct {
 	PerformedAt  time.Time          `json:"performed_at" bson:"performed_at"`
 }
 
-func NewUserGoodAction(userID, actionID primitive.ObjectID, username, actionName string) *UserGoodAction {
+func NewUserGoodAction(
+	id primitive.ObjectID,
+	userID primitive.ObjectID,
+	userWallet string,
+	username string,
+	actionID primitive.ObjectID,
+	actionName string,
+	rewardAmount int64,
+	performedAt time.Time,
+) *UserGoodAction {
 	return &UserGoodAction{
-		ID:          primitive.NewObjectID(),
-		UserID:      userID,
-		Username:    username,
-		ActionID:    actionID,
-		ActionName:  actionName,
-		PerformedAt: time.Now(),
+		ID:           id,
+		UserID:       userID,
+		UserWallet:   userWallet,
+		Username:     username,
+		ActionID:     actionID,
+		ActionName:   actionName,
+		RewardAmount: rewardAmount,
+		PerformedAt:  performedAt,
 	}
 }
