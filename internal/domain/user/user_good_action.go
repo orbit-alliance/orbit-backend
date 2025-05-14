@@ -7,20 +7,22 @@ import (
 )
 
 type UserGoodAction struct {
-	ID          primitive.ObjectID `json:"id" bson:"id"`
-	UserId      string             `json:"user_id" bson:"user_id"`
-	Username    string             `json:"username" bson:"username"`
-	ActionId    string             `json:"action_id" bson:"action_id"`
-	ActionName  string             `json:"action_name" bson:"action_name"`
-	PerformedAt time.Time          `json:"performed_at" bson:"performed_at"`
+	ID           primitive.ObjectID `json:"id" bson:"id"`
+	UserID       primitive.ObjectID `json:"user_id" bson:"user_id"`
+	UserWallet   string             `json:"user_wallet" bson:"user_wallet"`
+	Username     string             `json:"username" bson:"username"`
+	ActionID     primitive.ObjectID `json:"action_id" bson:"action_id"`
+	ActionName   string             `json:"action_name" bson:"action_name"`
+	RewardAmount int64              `json:"reward_amount" bson:"reward_amount"`
+	PerformedAt  time.Time          `json:"performed_at" bson:"performed_at"`
 }
 
-func NewUserGoodAction(userId, username, actionId, actionName string) *UserGoodAction {
+func NewUserGoodAction(userID, actionID primitive.ObjectID, username, actionName string) *UserGoodAction {
 	return &UserGoodAction{
 		ID:          primitive.NewObjectID(),
-		UserId:      userId,
+		UserID:      userID,
 		Username:    username,
-		ActionId:    actionId,
+		ActionID:    actionID,
 		ActionName:  actionName,
 		PerformedAt: time.Now(),
 	}
