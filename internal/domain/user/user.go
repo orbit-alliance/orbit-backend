@@ -9,13 +9,13 @@ import (
 )
 
 type User struct {
-	ID         primitive.ObjectID `json:"id" bson:"id"`
-	ID42       string             `json:"id_42" bson:"id_42"`
-	Wallet     string             `json:"wallet" bson:"wallet"`
-	Username   string             `json:"username" bson:"username"`
-	CoinStatus coin.CoinStatus    `json:"coin_status" bson:"coin_status"`
-	NFTs       []nft.NFT          `json:"nfts" bson:"nfts"`
-	CreatedAt  time.Time          `json:"created_at" bson:"created_at"`
+	ID         primitive.ObjectID `json:"id" bson:"_id"`
+	ID42       string             `json:"id_42" bson:"_id_42"`
+	Wallet     string             `json:"wallet" bson:"_wallet"`
+	Username   string             `json:"username" bson:"_username"`
+	CoinStatus coin.CoinStatus    `json:"coin_status" bson:"_coin_status"`
+	NFTs       []nft.NFT          `json:"nfts" bson:"_nfts"`
+	CreatedAt  time.Time          `json:"created_at" bson:"_created_at"`
 }
 
 func NewUser(id42, wallet, username string, coinStatus coin.CoinStatus, nfts []nft.NFT) *User {
