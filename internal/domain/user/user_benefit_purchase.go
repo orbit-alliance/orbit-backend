@@ -16,7 +16,7 @@ const (
 )
 
 type UserBenefitPurchase struct {
-	ID                   primitive.ObjectID        `json:"id" bson:"id"`
+	ID                   primitive.ObjectID        `json:"id" bson:"_id"`
 	UserID               string                    `json:"user_id" bson:"user_id"`
 	Username             string                    `json:"username" bson:"username"`
 	BenefitID            primitive.ObjectID        `json:"benefit_id" bson:"benefit_id"`

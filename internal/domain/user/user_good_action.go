@@ -7,7 +7,7 @@ import (
 )
 
 type UserGoodAction struct {
-	ID          primitive.ObjectID `json:"id" bson:"id"`
+	ID          primitive.ObjectID `json:"id" bson:"_id"`
 	UserId      string             `json:"user_id" bson:"user_id"`
 	Username    string             `json:"username" bson:"username"`
 	ActionId    string             `json:"action_id" bson:"action_id"`
