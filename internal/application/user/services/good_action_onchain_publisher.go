@@ -5,14 +5,13 @@ import (
 
 	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
-	"github.com/orbit-alliance/orbit-backend/internal/infra/web3"
 )
 
 type OnChainPublisher struct {
-	ethGateway web3.EthGateway
+	ethGateway user.BlockchainGateway
 }
 
-func NewOnChainPublisher(ethGateway web3.EthGateway) *OnChainPublisher {
+func NewOnChainPublisher(ethGateway user.BlockchainGateway) *OnChainPublisher {
 	return &OnChainPublisher{
 		ethGateway: ethGateway,
 	}

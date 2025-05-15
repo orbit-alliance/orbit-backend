@@ -32,7 +32,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Erro ao criar o EthGateway", err)
 	}
-	onChainPublisher := services.NewOnChainPublisher(*ethGateway)
+	onChainPublisher := services.NewOnChainPublisher(ethGateway)
 	eventBus.Subscribe(user.DidGoodAction{}.EventType(), onChainPublisher.Handler)
 
 	goodActionRepo := db.NewGoodActionRepository(db.Database)
