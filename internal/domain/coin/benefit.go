@@ -8,7 +8,7 @@ import (
 )
 
 type Benefit struct {
-	ID              primitive.ObjectID `json:"id" bson:"id"`
+	ID              primitive.ObjectID `json:"id" bson:"_id"`
 	Name            string             `json:"name" bson:"name"`
 	Description     string             `json:"description" bson:"description"`
 	EarnedCost      uint64             `json:"earned_cost" bson:"earned_cost"`

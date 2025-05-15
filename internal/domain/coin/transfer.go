@@ -7,7 +7,7 @@ import (
 )
 
 type Transfer struct {
-	ID           primitive.ObjectID `json:"id" bson:"id"`
+	ID           primitive.ObjectID `json:"id" bson:"_id"`
 	FromUserID   string             `json:"from_user_id" bson:"from_user_id"`
 	FromUsername string             `json:"from_username" bson:"from_username"`
 	ToUserID     string             `json:"to_user_id" bson:"to_user_id"`
