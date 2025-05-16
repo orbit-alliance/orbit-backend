@@ -57,3 +57,16 @@ func (r *GoodActionRepository) LoadAll(ctx context.Context) ([]coin.GoodAction, 
 
 	return goodActions, nil
 }
+
+func (r *GoodActionRepository) FindByID(ctx context.Context, id string) (*coin.GoodAction, error) {
+	filter := bson.M{"_id": id}
+	var goodAction coin.GoodAction
+	err := r.collection.FindOne(ctx, filter).Decode(&goodAction)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &goodAction, nil
+}
