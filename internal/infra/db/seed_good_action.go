@@ -11,7 +11,13 @@ import (
 func SeedGoodActions(ctx context.Context, repo *GoodActionRepository) {
 
 	// Verifica se já existem GoodActions na coleção
-	existingActions := repo.LoadAll(ctx)
+	existingActions, err := repo.LoadAll(ctx)
+
+	if err != nil {
+		log.Printf("Erro ao verificar GoodActions existentes: %v", err)
+		return
+	}
+
 	if len(existingActions) > 0 {
 		log.Println("GoodActions já existem na coleção. Pulando o seed.")
 		return
