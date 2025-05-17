@@ -49,7 +49,7 @@ func NewEthGateway(chainID int64) (*EthGateway, error) {
 	}, nil
 }
 
-func (g *EthGateway) PublishUserAction(ctx context.Context, payload user.UserGoodAction) error {
+func (g *EthGateway) PublishUserAction(ctx context.Context, payload *user.UserGoodAction) error {
 	tx, err := g.contract.PublishAction(
 		g.auth,
 		shared.ObjectIDToString(payload.ID),
