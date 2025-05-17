@@ -18,17 +18,17 @@ func (u *User) TransferCoins(to *User, amount uint64) (*TransferedCoins, error) 
 	return NewTransferedCoins(u, to, amount), nil
 }
 
-func (u *User) DoGoodAction(goodAction *UserGoodAction) *DidGoodAction {
+func (u *User) DoGoodAction(goodAction *UserGoodAction) (*DidGoodAction, error) {
 
 	if goodAction == nil {
-		return nil
+		return nil, nil
 	}
 	if goodAction.UserID != u.ID {
-		return nil
+		return nil, ErrUserNotAuthorized
 	}
 
 	u.CoinStatus.EarnedByActions += uint64(goodAction.RewardAmount)
-	return NewDidGoodAction(u, goodAction)
+	return NewDidGoodAction(u, goodAction), nil
 }
 
 func min(a, b uint64) uint64 {
