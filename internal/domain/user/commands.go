@@ -23,10 +23,6 @@ func (u *User) DoGoodAction(goodAction *UserGoodAction) *DidGoodAction {
 	if goodAction == nil {
 		return nil
 	}
-	if goodAction.RewardAmount == 0 {
-		return nil
-	}
-
 	if goodAction.UserID != u.ID {
 		return nil
 	}
