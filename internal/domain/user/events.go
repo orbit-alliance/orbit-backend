@@ -22,3 +22,18 @@ func NewTransferedCoins(from, to *User, amount uint64) *TransferedCoins {
 		To:        to,
 	}
 }
+
+type DidGoodAction struct {
+	shared.BaseEvent
+	Action UserGoodAction
+}
+
+func (e DidGoodAction) EventType() string {
+	return "user.DidGoodAction"
+}
+func NewDidGoodAction(user *User, action UserGoodAction) *DidGoodAction {
+	return &DidGoodAction{
+		BaseEvent: shared.NewBaseEvent(user.ID),
+		Action:    action,
+	}
+}
