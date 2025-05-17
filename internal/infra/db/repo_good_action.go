@@ -35,10 +35,10 @@ func (r *GoodActionRepository) Save(ctx context.Context, goodAction *coin.GoodAc
 	return nil
 }
 
-func (r *GoodActionRepository) LoadAll(ctx context.Context) []coin.GoodAction {
+func (r *GoodActionRepository) LoadAll(ctx context.Context) ([]coin.GoodAction, error) {
 	cursor, err := r.collection.Find(ctx, bson.M{})
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	defer cursor.Close(ctx)
 
@@ -46,14 +46,27 @@ func (r *GoodActionRepository) LoadAll(ctx context.Context) []coin.GoodAction {
 	for cursor.Next(ctx) {
 		var goodAction coin.GoodAction
 		if err := cursor.Decode(&goodAction); err != nil {
-			return nil
+			return nil, err
 		}
 		goodActions = append(goodActions, goodAction)
 	}
 
 	if err := cursor.Err(); err != nil {
-		return nil
+		return nil, err
 	}
 
-	return goodActions
+	return goodActions, nil
+}
+
+func (r *GoodActionRepository) FindByID(ctx context.Context, id string) (*coin.GoodAction, error) {
+	filter := bson.M{"_id": id}
+	var goodAction coin.GoodAction
+	err := r.collection.FindOne(ctx, filter).Decode(&goodAction)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &goodAction, nil
 }
