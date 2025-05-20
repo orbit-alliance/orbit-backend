@@ -6,11 +6,11 @@ import (
 )
 
 type TransferCoinsService struct {
-	userRepo user.Repository
+	userRepo user.UserRepository
 	eventBus *shared.EventBus
 }
 
-func NewTransferCoinsService(userRepo user.Repository, eventBus *shared.EventBus) *TransferCoinsService {
+func NewTransferCoinsService(userRepo user.UserRepository, eventBus *shared.EventBus) *TransferCoinsService {
 	return &TransferCoinsService{
 		userRepo: userRepo,
 		eventBus: eventBus,
