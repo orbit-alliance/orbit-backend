@@ -25,41 +25,44 @@ import (
 */
 
 type RetroactiveFrequencyRewardService struct {
-	userRepo       user.UserRepository
-	goodActionRepo coin.GoodActionRepository
-	userData       user.User
-	userGateway    user.Gateway
-	eventBus       *shared.EventBus
+	userRepo           user.UserRepository
+	goodActionRepo     coin.GoodActionRepository
+	userGoodActionRepo user.UserGoodActionRepository
+	userData           user.User
+	userGateway        user.Gateway
+	eventBus           *shared.EventBus
 }
 
 func NewRetroactiveFrequencyRewardService(
 	userRepo user.UserRepository,
 	goodActionRepo coin.GoodActionRepository,
+	userGoodActionRepo user.UserGoodActionRepository,
 	userData user.User,
 	userGateway user.Gateway,
 	eventBus *shared.EventBus,
 ) *RetroactiveFrequencyRewardService {
 	return &RetroactiveFrequencyRewardService{
-		userRepo:       userRepo,
-		goodActionRepo: goodActionRepo,
-		userData:       userData,
-		userGateway:    userGateway,
-		eventBus:       eventBus,
+		userRepo:           userRepo,
+		goodActionRepo:     goodActionRepo,
+		userGoodActionRepo: userGoodActionRepo,
+		userData:           userData,
+		userGateway:        userGateway,
+		eventBus:           eventBus,
 	}
 }
 
 const (
-	DAY_REWARD         = "test0"
-	SEQUENCE_26_REWARD = "test1"
-	SEQUENCE_42_REWARD = "test2"
+	DAY_REWARD         = "Frequência Premiada"
+	SEQUENCE_26_REWARD = "26 dias Consecutivos de Presença"
+	SEQUENCE_42_REWARD = "42 dias Consecutivos de Presença"
 )
 
 // Não sei como deveria fazer para pegar as recompensas geradas do seed.
-func createReward(rewardId string, rewardList []coin.GoodAction) coin.GoodAction {
+func getReward(rewardId string, rewardList []coin.GoodAction) coin.GoodAction {
 	var rewardCopy coin.GoodAction
 
 	for _, reward := range rewardList {
-		if reward.ID == rewardId {
+		if reward.Name == rewardId {
 			rewardCopy = reward
 			break
 		}
@@ -97,20 +100,20 @@ func getRetroactiveReward(user user.User, logList []user.UserLoggedDaysDTO, rewa
 		}
 
 		if currentStreak == 26 {
-			groupGoodActions = append(groupGoodActions, createReward(SEQUENCE_26_REWARD, rewardList))
+			groupGoodActions = append(groupGoodActions, getReward(SEQUENCE_26_REWARD, rewardList))
 		} else if currentStreak == 42 {
-			groupGoodActions = append(groupGoodActions, createReward(SEQUENCE_42_REWARD, rewardList))
+			groupGoodActions = append(groupGoodActions, getReward(SEQUENCE_42_REWARD, rewardList))
 		}
-		groupGoodActions = append(groupGoodActions, createReward(DAY_REWARD, rewardList))
+		groupGoodActions = append(groupGoodActions, getReward(DAY_REWARD, rewardList))
 		lastDate = log.Date
 	}
 	return lastLogin, currentStreak, groupGoodActions
 }
 
 func (s *RetroactiveFrequencyRewardService) ApplyRetroactiveFrequencyRewardHandler(ctx context.Context) error {
-	var user user.User = s.userData
+	var usr user.User = s.userData
 
-	logList, err := s.userGateway.GetRetroactiveLoggedDays(user.ID42, user.LastLoginIn42)
+	logList, err := s.userGateway.GetRetroactiveLoggedDays(usr.ID42, usr.LastLoginIn42)
 	if err != nil {
 		return err
 	}
@@ -121,10 +124,13 @@ func (s *RetroactiveFrequencyRewardService) ApplyRetroactiveFrequencyRewardHandl
 	}
 
 	newLastLogin, newStreak, groupGoodActions := getRetroactiveReward(s.userData, logList, rewardList)
-	user.LastLoginIn42 = newLastLogin
-	user.CurrentStreak = newStreak
-	// Descobrir como adicionar boas ações aos usuários.
-	err = s.userRepo.Save(ctx, &user)
+	usr.LastLoginIn42 = newLastLogin
+	usr.CurrentStreak = newStreak
+	for _, action := range groupGoodActions {
+		newUserGoodAction := user.NewUserGoodAction(usr.ID.String(), usr.Username, action.ID.String(), action.Name)
+		s.userGoodActionRepo.Save(ctx, newUserGoodAction)
+	}
+	err = s.userRepo.Save(ctx, &usr)
 	if err != nil {
 		return err
 	}
