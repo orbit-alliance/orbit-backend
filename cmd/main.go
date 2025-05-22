@@ -41,7 +41,9 @@ func main() {
 	transferCoinsService := services.NewTransferCoinsService(userRepo, transferRepo, eventBus)
 
 	ethGateway.TransferListener(context.TODO(), func(event user.TransferDTO) {
-		_ = transferCoinsService.TransferCoins(event)
+		if err := transferCoinsService.TransferCoins(event); err != nil {
+			log.Printf("Failed to transfer coins for event %+v: %v", event, err)
+		}
 	})
 
 	db.SeedGoodActions(context.TODO(), goodActionRepo)
