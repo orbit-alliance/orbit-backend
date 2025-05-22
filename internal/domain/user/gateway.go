@@ -1,9 +1,22 @@
 package user
 
-import "context"
+import (
+	"context"
+)
+
+type TransferDTO struct {
+	From   string
+	To     string
+	Amount uint64
+}
 
 type BlockchainGateway interface {
 	PublishUserAction(ctx context.Context, payload *UserGoodAction) error
+	TransferListener(ctx context.Context, handler func(event TransferDTO)) error
+}
+
+type BlockchainEventListener interface {
+	Start(ctx context.Context) error
 }
 
 type UserProjectBonusDTO struct {
