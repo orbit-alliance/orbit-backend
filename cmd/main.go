@@ -36,6 +36,14 @@ func main() {
 	eventBus.Subscribe(user.DidGoodAction{}.EventType(), onChainPublisher.Handler)
 
 	goodActionRepo := db.NewGoodActionRepository(db.Database)
+	userRepo := db.NewUserRepository(db.Database)
+	transferRepo := db.NewTransferRepository(db.Database)
+	transferCoinsService := services.NewTransferCoinsService(userRepo, transferRepo, eventBus)
+
+	ethGateway.TransferListener(context.TODO(), func(event user.TransferDTO) {
+		_ = transferCoinsService.TransferCoins(event)
+	})
+
 	db.SeedGoodActions(context.TODO(), goodActionRepo)
 
 }
