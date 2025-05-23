@@ -15,11 +15,21 @@ type UserRepository interface {
 }
 
 type UserGoodActionRepository interface {
-	Save(ctx context.Context, user *User) error
+	Save(ctx context.Context, user *UserGoodAction) error
 	FindByID(ctx context.Context, id string) (*coin.GoodAction, error)
 	LoadAll(ctx context.Context) ([]coin.GoodAction, error)
+	LoadByName(ctx context.Context, name string) (*coin.GoodAction, error)
 }
 
 type TransferRepository interface {
 	Save(ctx context.Context, transfer *coin.Transfer) error
+}
+
+type UserProjectRepository interface {
+	Save(ctx context.Context, user *UserProject) error
+	LoadByUserID(ctx context.Context, userID string) ([]*UserProject, error)
+}
+
+type GoodActionRepository interface {
+	LoadByName(ctx context.Context, name string) (*coin.GoodAction, error)
 }
