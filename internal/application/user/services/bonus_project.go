@@ -17,12 +17,21 @@ type BonusProjectService struct {
 	api42Gateway       user.Api42Gateway
 }
 
-func NewBonusProjectService(userRepo user.UserRepository, eventBus *shared.EventBus, userProjectRepo user.UserProjectRepository, api42Gateway user.Api42Gateway) *BonusProjectService {
+func NewBonusProjectService(
+	userRepo user.UserRepository,
+	eventBus *shared.EventBus,
+	userProjectRepo user.UserProjectRepository,
+	userGoodActionRepo user.UserGoodActionRepository,
+	goodActionRepo user.GoodActionRepository,
+	api42Gateway user.Api42Gateway,
+) *BonusProjectService {
 	return &BonusProjectService{
-		userRepo:        userRepo,
-		eventBus:        eventBus,
-		userProjectRepo: userProjectRepo,
-		api42Gateway:    api42Gateway,
+		userRepo:           userRepo,
+		eventBus:           eventBus,
+		userProjectRepo:    userProjectRepo,
+		userGoodActionRepo: userGoodActionRepo,
+		goodActionRepo:     goodActionRepo,
+		api42Gateway:       api42Gateway,
 	}
 }
 
