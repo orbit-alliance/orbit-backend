@@ -16,9 +16,6 @@ type UserRepository interface {
 
 type UserGoodActionRepository interface {
 	Save(ctx context.Context, user *UserGoodAction) error
-	FindByID(ctx context.Context, id string) (*coin.GoodAction, error)
-	LoadAll(ctx context.Context) ([]coin.GoodAction, error)
-	LoadByName(ctx context.Context, name string) (*coin.GoodAction, error)
 }
 
 type TransferRepository interface {
