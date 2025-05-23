@@ -11,6 +11,8 @@ import (
 	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
 	"github.com/orbit-alliance/orbit-backend/internal/infra/db"
+	repo "github.com/orbit-alliance/orbit-backend/internal/infra/db/repos"
+	seed "github.com/orbit-alliance/orbit-backend/internal/infra/db/seeds"
 	"github.com/orbit-alliance/orbit-backend/internal/infra/web3"
 )
 
@@ -35,9 +37,9 @@ func main() {
 	onChainPublisher := services.NewOnChainPublisher(ethGateway)
 	eventBus.Subscribe(user.DidGoodAction{}.EventType(), onChainPublisher.Handler)
 
-	goodActionRepo := db.NewGoodActionRepository(db.Database)
-	userRepo := db.NewUserRepository(db.Database)
-	transferRepo := db.NewTransferRepository(db.Database)
+	goodActionRepo := repo.NewGoodActionRepository(db.Database)
+	userRepo := repo.NewUserRepository(db.Database)
+	transferRepo := repo.NewTransferRepository(db.Database)
 	transferCoinsService := services.NewTransferCoinsService(userRepo, transferRepo, eventBus)
 
 	ethGateway.TransferListener(context.TODO(), func(event user.TransferDTO) {
@@ -46,6 +48,6 @@ func main() {
 		}
 	})
 
-	db.SeedGoodActions(context.TODO(), goodActionRepo)
+	seed.SeedGoodActions(context.TODO(), goodActionRepo)
 
 }
