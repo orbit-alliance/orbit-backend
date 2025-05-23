@@ -36,6 +36,16 @@ func main() {
 	eventBus.Subscribe(user.DidGoodAction{}.EventType(), onChainPublisher.Handler)
 
 	goodActionRepo := db.NewGoodActionRepository(db.Database)
+	userRepo := db.NewUserRepository(db.Database)
+	transferRepo := db.NewTransferRepository(db.Database)
+	transferCoinsService := services.NewTransferCoinsService(userRepo, transferRepo, eventBus)
+
+	ethGateway.TransferListener(context.TODO(), func(event user.TransferDTO) {
+		if err := transferCoinsService.TransferCoins(event); err != nil {
+			log.Printf("Failed to transfer coins for event %+v: %v", event, err)
+		}
+	})
+
 	db.SeedGoodActions(context.TODO(), goodActionRepo)
 
 }

@@ -19,3 +19,7 @@ type UserGoodActionRepository interface {
 	FindByID(ctx context.Context, id string) (*coin.GoodAction, error)
 	LoadAll(ctx context.Context) ([]coin.GoodAction, error)
 }
+
+type TransferRepository interface {
+	Save(ctx context.Context, transfer *coin.Transfer) error
+}

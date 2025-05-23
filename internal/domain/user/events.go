@@ -2,21 +2,39 @@ package user
 
 import "github.com/orbit-alliance/orbit-backend/internal/domain/shared"
 
-// TransferedCoins is the event that is triggered when a user transfers coins
-type TransferedCoins struct {
+type SendedCoins struct {
 	shared.BaseEvent
 	Amount uint64
 	From   *User
 	To     *User
 }
 
-func (e TransferedCoins) EventType() string {
-	return "user.TransferedCoins"
+func (e SendedCoins) EventType() string {
+	return "user.SendedCoins"
 }
 
-func NewTransferedCoins(from, to *User, amount uint64) *TransferedCoins {
-	return &TransferedCoins{
+func NewSendedCoins(from, to *User, amount uint64) *SendedCoins {
+	return &SendedCoins{
 		BaseEvent: shared.NewBaseEvent(from.ID),
+		Amount:    amount,
+		From:      from,
+		To:        to,
+	}
+}
+
+type ReceivedCoins struct {
+	shared.BaseEvent
+	Amount uint64
+	From   *User
+	To     *User
+}
+
+func (e ReceivedCoins) EventType() string {
+	return "user.ReceivedCoins"
+}
+func NewReceivedCoins(from, to *User, amount uint64) *ReceivedCoins {
+	return &ReceivedCoins{
+		BaseEvent: shared.NewBaseEvent(to.ID),
 		Amount:    amount,
 		From:      from,
 		To:        to,

@@ -1,7 +1,7 @@
 package user
 
 // Deducts the transferred amount from the total balance, prioritizing the transferred balance and then the balance earned by shares
-func (u *User) TransferCoins(to *User, amount uint64) (*TransferedCoins, error) {
+func (u *User) SendCoins(to *User, amount uint64) (*SendedCoins, error) {
 	totalBalance := u.CoinStatus.EarnedByTransfer + u.CoinStatus.EarnedByActions
 	if totalBalance < amount {
 		return nil, ErrInsufficientBalance
@@ -15,7 +15,13 @@ func (u *User) TransferCoins(to *User, amount uint64) (*TransferedCoins, error) 
 	remaining := amount - transferUsed
 	u.CoinStatus.EarnedByActions -= remaining
 
-	return NewTransferedCoins(u, to, amount), nil
+	return NewSendedCoins(u, to, amount), nil
+}
+
+func (u *User) ReceiveCoins(from *User, amount uint64) (*ReceivedCoins, error) {
+	u.CoinStatus.EarnedByActions += amount
+
+	return NewReceivedCoins(from, u, amount), nil
 }
 
 func (u *User) DoGoodAction(goodAction *UserGoodAction) (*DidGoodAction, error) {
