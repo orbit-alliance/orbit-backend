@@ -43,10 +43,8 @@ func (u *User) doGoodAction(goodAction *UserGoodAction) (*DidGoodAction, error) 
 
 func (u *User) DoBonusProject(newProject, oldProject *UserProject, goodAction coin.GoodAction) (*DidGoodAction, *UserGoodAction, error) {
 
-	noBonusScore := uint8(100)
-
 	if oldProject == nil {
-		userGoodAction := NewUserGoodAction(shared.NewMongoID(), u.ID, u.Wallet, u.Username, goodAction.ID, goodAction.Name, int64(newProject.MaxScore-noBonusScore), time.Now())
+		userGoodAction := NewUserGoodAction(shared.NewMongoID(), u.ID, u.Wallet, u.Username, goodAction.ID, goodAction.Name, int64(newProject.MaxScore-DefaultMaxScore), time.Now())
 		didGoodAction, err := u.doGoodAction(userGoodAction)
 		return didGoodAction, userGoodAction, err
 	}
@@ -56,10 +54,8 @@ func (u *User) DoBonusProject(newProject, oldProject *UserProject, goodAction co
 
 func (u *User) retryProject(newProject, olderProject *UserProject, goodAction coin.GoodAction) (*DidGoodAction, *UserGoodAction, error) {
 
-	noBonusScore := uint8(100)
-
 	if olderProject.MaxScore < newProject.MaxScore {
-		userGoodAction := NewUserGoodAction(shared.NewMongoID(), u.ID, u.Wallet, u.Username, goodAction.ID, goodAction.Name, int64(newProject.MaxScore-olderProject.MaxScore-noBonusScore), time.Now())
+		userGoodAction := NewUserGoodAction(shared.NewMongoID(), u.ID, u.Wallet, u.Username, goodAction.ID, goodAction.Name, int64(newProject.MaxScore-olderProject.MaxScore-DefaultMaxScore), time.Now())
 		didGoodAction, err := u.doGoodAction(userGoodAction)
 		return didGoodAction, userGoodAction, err
 	}
