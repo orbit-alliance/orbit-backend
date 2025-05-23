@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 
+	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -37,9 +38,15 @@ func (r *UserRepository) Save(ctx context.Context, user *user.User) error {
 }
 
 func (r *UserRepository) FindByID(ctx context.Context, id string) (*user.User, error) {
-	filter := bson.M{"_id": id}
+
+	idObj, err := shared.ObjectIDFromString(id)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.M{"_id": idObj}
 	var user user.User
-	err := r.collection.FindOne(ctx, filter).Decode(&user)
+	err = r.collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, nil
