@@ -1,9 +1,10 @@
-package db
+package repo
 
 import (
 	"context"
 
 	"github.com/orbit-alliance/orbit-backend/internal/domain/coin"
+	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -59,7 +60,26 @@ func (r *GoodActionRepository) LoadAll(ctx context.Context) ([]coin.GoodAction, 
 }
 
 func (r *GoodActionRepository) FindByID(ctx context.Context, id string) (*coin.GoodAction, error) {
-	filter := bson.M{"_id": id}
+
+	idObj, err := shared.ObjectIDFromString(id)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.M{"_id": idObj}
+	var goodAction coin.GoodAction
+	err = r.collection.FindOne(ctx, filter).Decode(&goodAction)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &goodAction, nil
+}
+
+func (r *GoodActionRepository) LoadByName(ctx context.Context, name string) (*coin.GoodAction, error) {
+	filter := bson.M{"name": name}
 	var goodAction coin.GoodAction
 	err := r.collection.FindOne(ctx, filter).Decode(&goodAction)
 	if err != nil {

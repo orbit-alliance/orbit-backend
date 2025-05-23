@@ -46,7 +46,7 @@ func (r *Gateway42) GetRetroactiveLoggedDays(userID string, startAt string) ([]u
 		return nil, ErrFailToGetLocationIn42
 	}
 
-	for date, _ := range apiData {
+	for date := range apiData {
 		newDay := user.UserLoggedDaysDTO{
 			Date: date,
 		}
