@@ -14,7 +14,7 @@ type UserGoodActionRepository struct {
 }
 
 func NewUserGoodActionRepository(db *mongo.Database) *UserGoodActionRepository {
-	collection := db.Collection("NFts")
+	collection := db.Collection("user_good_actions")
 	return &UserGoodActionRepository{collection: collection}
 }
 
