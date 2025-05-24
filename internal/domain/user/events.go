@@ -2,6 +2,36 @@ package user
 
 import "github.com/orbit-alliance/orbit-backend/internal/domain/shared"
 
+type User42Registered struct {
+	shared.BaseEvent
+	User *User
+}
+
+func (e User42Registered) EventType() string {
+	return "user.User42Registered"
+}
+func NewUser42Registered(user *User) *User42Registered {
+	return &User42Registered{
+		BaseEvent: shared.NewBaseEvent(shared.NewMongoID()),
+		User:      user,
+	}
+}
+
+type UserWalletChanged struct {
+	shared.BaseEvent
+	user *User
+}
+
+func (e UserWalletChanged) EventType() string {
+	return "user.UserWalletChanged"
+}
+func NewUserWalletChanged(user *User) *UserWalletChanged {
+	return &UserWalletChanged{
+		BaseEvent: shared.NewBaseEvent(shared.NewMongoID()),
+		user:      user,
+	}
+}
+
 type SendedCoins struct {
 	shared.BaseEvent
 	Amount uint64
@@ -15,7 +45,7 @@ func (e SendedCoins) EventType() string {
 
 func NewSendedCoins(from, to *User, amount uint64) *SendedCoins {
 	return &SendedCoins{
-		BaseEvent: shared.NewBaseEvent(from.ID),
+		BaseEvent: shared.NewBaseEvent(shared.NewMongoID()),
 		Amount:    amount,
 		From:      from,
 		To:        to,
@@ -34,7 +64,7 @@ func (e ReceivedCoins) EventType() string {
 }
 func NewReceivedCoins(from, to *User, amount uint64) *ReceivedCoins {
 	return &ReceivedCoins{
-		BaseEvent: shared.NewBaseEvent(to.ID),
+		BaseEvent: shared.NewBaseEvent(shared.NewMongoID()),
 		Amount:    amount,
 		From:      from,
 		To:        to,
@@ -51,7 +81,7 @@ func (e DidGoodAction) EventType() string {
 }
 func NewDidGoodAction(user *User, action *UserGoodAction) *DidGoodAction {
 	return &DidGoodAction{
-		BaseEvent: shared.NewBaseEvent(user.ID),
+		BaseEvent: shared.NewBaseEvent(shared.NewMongoID()),
 		Action:    action,
 	}
 }
