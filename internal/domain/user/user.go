@@ -18,8 +18,9 @@ type User struct {
 	CreatedAt  time.Time          `json:"created_at" bson:"created_at"`
 }
 
-func NewUser(id42, wallet, username string, coinStatus coin.CoinStatus, nfts []nft.NFT) *User {
+func NewUser(id primitive.ObjectID, id42, wallet, username string, coinStatus coin.CoinStatus, nfts []nft.NFT) *User {
 	return &User{
+		ID:         id,
 		ID42:       id42,
 		Wallet:     wallet,
 		Username:   username,
