@@ -6,9 +6,9 @@ import (
 	"net/http"
 )
 
-func getUserByID(userID, token string) (userResponse, error) {
+func getUserByID(user42ID, token string) (userResponse, error) {
 	var data userResponse
-	url := fmt.Sprintf("https://api.intra.42.fr/v2/users/%s", userID)
+	url := fmt.Sprintf("https://api.intra.42.fr/v2/users/%s", user42ID)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
