@@ -1,12 +1,13 @@
-package db
+package seed
 
 import (
 	"context"
 
 	"github.com/orbit-alliance/orbit-backend/internal/domain/nft"
+	repo "github.com/orbit-alliance/orbit-backend/internal/infra/db/repos"
 )
 
-func SeedNFTs(ctx context.Context, nftRepo *NFTRepository) {
+func SeedNFTs(ctx context.Context, nftRepo *repo.NFTRepository) {
 
 	if len(nftRepo.LoadAll(ctx)) > 0 {
 		return

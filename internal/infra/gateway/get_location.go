@@ -3,7 +3,7 @@ package gateway_42
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -27,7 +27,7 @@ func getLocationByUserID(startAt, endAt, userID, token string) (locationResponse
 		return nil, fmt.Errorf("error fetching token: %s", resp.Status)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}

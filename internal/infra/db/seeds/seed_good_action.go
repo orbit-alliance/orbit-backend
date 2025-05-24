@@ -1,4 +1,4 @@
-package db
+package seed
 
 import (
 	"context"
@@ -6,12 +6,19 @@ import (
 
 	"github.com/orbit-alliance/orbit-backend/internal/domain/coin"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/nft"
+	repo "github.com/orbit-alliance/orbit-backend/internal/infra/db/repos"
 )
 
-func SeedGoodActions(ctx context.Context, repo *GoodActionRepository) {
+func SeedGoodActions(ctx context.Context, repo *repo.GoodActionRepository) {
 
 	// Verifica se já existem GoodActions na coleção
-	existingActions := repo.LoadAll(ctx)
+	existingActions, err := repo.LoadAll(ctx)
+
+	if err != nil {
+		log.Printf("Erro ao verificar GoodActions existentes: %v", err)
+		return
+	}
+
 	if len(existingActions) > 0 {
 		log.Println("GoodActions já existem na coleção. Pulando o seed.")
 		return

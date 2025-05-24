@@ -7,21 +7,34 @@ import (
 )
 
 type UserGoodAction struct {
-	ID          primitive.ObjectID `json:"id" bson:"_id"`
-	UserId      string             `json:"user_id" bson:"user_id"`
-	Username    string             `json:"username" bson:"username"`
-	ActionId    string             `json:"action_id" bson:"action_id"`
-	ActionName  string             `json:"action_name" bson:"action_name"`
-	PerformedAt time.Time          `json:"performed_at" bson:"performed_at"`
+	ID           primitive.ObjectID `json:"id" bson:"_id"`
+	UserID       primitive.ObjectID `json:"user_id" bson:"user_id"`
+	UserWallet   string             `json:"user_wallet" bson:"user_wallet"`
+	Username     string             `json:"username" bson:"username"`
+	ActionID     primitive.ObjectID `json:"action_id" bson:"action_id"`
+	ActionName   string             `json:"action_name" bson:"action_name"`
+	RewardAmount int64              `json:"reward_amount" bson:"reward_amount"`
+	PerformedAt  time.Time          `json:"performed_at" bson:"performed_at"`
 }
 
-func NewUserGoodAction(userId, username, actionId, actionName string) *UserGoodAction {
+func NewUserGoodAction(
+	id primitive.ObjectID,
+	userID primitive.ObjectID,
+	userWallet string,
+	username string,
+	actionID primitive.ObjectID,
+	actionName string,
+	rewardAmount int64,
+	performedAt time.Time,
+) *UserGoodAction {
 	return &UserGoodAction{
-		ID:          primitive.NewObjectID(),
-		UserId:      userId,
-		Username:    username,
-		ActionId:    actionId,
-		ActionName:  actionName,
-		PerformedAt: time.Now(),
+		ID:           id,
+		UserID:       userID,
+		UserWallet:   userWallet,
+		Username:     username,
+		ActionID:     actionID,
+		ActionName:   actionName,
+		RewardAmount: rewardAmount,
+		PerformedAt:  performedAt,
 	}
 }
