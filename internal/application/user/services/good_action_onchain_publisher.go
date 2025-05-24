@@ -16,7 +16,7 @@ func NewOnChainPublisher(ethGateway user.BlockchainGateway) *OnChainPublisher {
 		ethGateway: ethGateway,
 	}
 }
-func (p *OnChainPublisher) Handler(ctx context.Context, event shared.DomainEvent) {
+func (p *OnChainPublisher) GoodActionPublisher(ctx context.Context, event shared.DomainEvent) {
 
 	if e, ok := event.(*user.DidGoodAction); ok {
 		p.ethGateway.PublishUserAction(ctx, e.Action)
