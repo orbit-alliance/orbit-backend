@@ -64,6 +64,15 @@ func (u *User) DoBonusProject(newProject, oldProject *UserProject, goodAction co
 	return u.retryProject(newProject, oldProject, goodAction)
 }
 
+func (u *User) DoFrequencyReward(newLastLogin string, newStreak int, goodAction coin.GoodAction) (*DidGoodAction, *UserGoodAction, error) {
+	u.LastLoginIn42 = newLastLogin
+	u.CurrentStreak = newStreak
+	userGoodAction := NewUserGoodAction(shared.NewMongoID(), u.ID, u.Wallet, u.Username, goodAction.ID, goodAction.Name, int64(goodAction.RewardAmount), time.Now())
+	didGoodAction, err := u.doGoodAction(userGoodAction)
+
+	return didGoodAction, userGoodAction, err
+}
+
 func (u *User) retryProject(newProject, olderProject *UserProject, goodAction coin.GoodAction) (*DidGoodAction, *UserGoodAction, error) {
 
 	if olderProject.MaxScore < newProject.MaxScore {

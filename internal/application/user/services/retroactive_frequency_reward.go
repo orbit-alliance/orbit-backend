@@ -9,27 +9,11 @@ import (
 	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
 )
 
-/* TODO list
-
-1. Pegar o dia atual
-2. Pegar o ultimo dia presente na tabela do usuário
-3. Chamar a função que pega os dias logados entre essas datas
-4. Adicionar ao usuário uma quantidade de moedas igual a quantidade de dias logados
-5. Atualizar o último dia logado do usuário
-
-1. Pegar a sequencia atual de dias logados do usuário
-2. Verificar quantos dias logados estão em sequência + somado a sequencia atual
-3. Adicionar ao usuário a cada marcador "x" um bonus de "n" moedas
-4. Atualizar a sequencia atual do usuário
-
-*/
-
 type RetroactiveFrequencyRewardService struct {
 	userRepo           user.UserRepository
 	goodActionRepo     coin.GoodActionRepository
 	userGoodActionRepo user.UserGoodActionRepository
-	userData           user.User
-	userGateway        user.Gateway
+	userGateway        user.Api42Gateway
 	eventBus           *shared.EventBus
 }
 
@@ -37,15 +21,13 @@ func NewRetroactiveFrequencyRewardService(
 	userRepo user.UserRepository,
 	goodActionRepo coin.GoodActionRepository,
 	userGoodActionRepo user.UserGoodActionRepository,
-	userData user.User,
-	userGateway user.Gateway,
+	userGateway user.Api42Gateway,
 	eventBus *shared.EventBus,
 ) *RetroactiveFrequencyRewardService {
 	return &RetroactiveFrequencyRewardService{
 		userRepo:           userRepo,
 		goodActionRepo:     goodActionRepo,
 		userGoodActionRepo: userGoodActionRepo,
-		userData:           userData,
 		userGateway:        userGateway,
 		eventBus:           eventBus,
 	}
@@ -110,8 +92,11 @@ func getRetroactiveReward(user user.User, logList []user.UserLoggedDaysDTO, rewa
 	return lastLogin, currentStreak, groupGoodActions
 }
 
-func (s *RetroactiveFrequencyRewardService) ApplyRetroactiveFrequencyRewardHandler(ctx context.Context) error {
-	var usr user.User = s.userData
+func (s *RetroactiveFrequencyRewardService) ApplyRetroactiveFrequencyRewardHandler(ctx context.Context, userID string) error {
+	var usr, err = s.userRepo.FindByID(ctx, userID)
+	if err != nil {
+		return err
+	}
 
 	logList, err := s.userGateway.GetRetroactiveLoggedDays(usr.ID42, usr.LastLoginIn42)
 	if err != nil {
@@ -123,18 +108,23 @@ func (s *RetroactiveFrequencyRewardService) ApplyRetroactiveFrequencyRewardHandl
 		return err
 	}
 
-	newLastLogin, newStreak, groupGoodActions := getRetroactiveReward(s.userData, logList, rewardList)
-	usr.LastLoginIn42 = newLastLogin
-	usr.CurrentStreak = newStreak
+	newLastLogin, newStreak, groupGoodActions := getRetroactiveReward(*usr, logList, rewardList)
+
 	for _, action := range groupGoodActions {
-		newUserGoodAction := user.NewUserGoodAction(usr.ID.String(), usr.Username, action.ID.String(), action.Name)
-		s.userGoodActionRepo.Save(ctx, newUserGoodAction)
+		evt, userGoodAction, err := usr.DoFrequencyReward(newLastLogin, newStreak, action)
+		if err != nil {
+			return err
+		}
+		if evt != nil {
+			s.eventBus.Publish(ctx, evt)
+
+			if err := s.userRepo.Save(ctx, usr); err != nil {
+				return err
+			}
+			if err := s.userGoodActionRepo.Save(ctx, userGoodAction); err != nil {
+				return err
+			}
+		}
 	}
-	err = s.userRepo.Save(ctx, &usr)
-	if err != nil {
-		return err
-	}
-	//s.eventBus.Subscribe("ctx", this)
-	// Descobrir como faço para adicionar o evento.
 	return nil
 }
