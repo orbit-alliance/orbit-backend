@@ -23,7 +23,7 @@ func (u *User) ChangeWalletAddress(newWallet string, coinsStatus coin.CoinStatus
 }
 
 // Deducts the transferred amount from the total balance, prioritizing the transferred balance and then the balance earned by shares
-func (u *User) SendCoins(to *User, amount uint64) (*SendedCoins, error) {
+func (u *User) SendCoins(to *User, amount uint64) (*SentCoins, error) {
 	totalBalance := u.CoinStatus.EarnedByTransfer + u.CoinStatus.EarnedByActions
 	if totalBalance < amount {
 		return nil, ErrInsufficientBalance
@@ -34,7 +34,7 @@ func (u *User) SendCoins(to *User, amount uint64) (*SendedCoins, error) {
 	remaining := amount - transferUsed
 	u.CoinStatus.EarnedByActions -= remaining
 
-	return NewSendedCoins(u, to, amount), nil
+	return NewSentCoins(u, to, amount), nil
 }
 
 func (u *User) ReceiveCoins(from *User, amount uint64) (*ReceivedCoins, error) {

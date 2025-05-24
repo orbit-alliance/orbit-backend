@@ -32,19 +32,19 @@ func NewUserWalletChanged(user *User) *UserWalletChanged {
 	}
 }
 
-type SendedCoins struct {
+type SentCoins struct {
 	shared.BaseEvent
 	Amount uint64
 	From   *User
 	To     *User
 }
 
-func (e SendedCoins) EventType() string {
-	return "user.SendedCoins"
+func (e SentCoins) EventType() string {
+	return "user.SentCoins"
 }
 
-func NewSendedCoins(from, to *User, amount uint64) *SendedCoins {
-	return &SendedCoins{
+func NewSentCoins(from, to *User, amount uint64) *SentCoins {
+	return &SentCoins{
 		BaseEvent: shared.NewBaseEvent(shared.NewMongoID()),
 		Amount:    amount,
 		From:      from,
