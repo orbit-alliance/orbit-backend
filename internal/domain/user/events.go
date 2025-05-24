@@ -19,7 +19,7 @@ func NewUser42Registered(user *User) *User42Registered {
 
 type UserWalletChanged struct {
 	shared.BaseEvent
-	user *User
+	User *User
 }
 
 func (e UserWalletChanged) EventType() string {
@@ -28,7 +28,7 @@ func (e UserWalletChanged) EventType() string {
 func NewUserWalletChanged(user *User) *UserWalletChanged {
 	return &UserWalletChanged{
 		BaseEvent: shared.NewBaseEvent(shared.NewMongoID()),
-		user:      user,
+		User:      user,
 	}
 }
 
