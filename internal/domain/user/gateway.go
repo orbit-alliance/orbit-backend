@@ -35,4 +35,5 @@ type Api42Gateway interface {
 	GetRetroactiveBonusProject(userID string) ([]UserProjectBonusDTO, error)
 	GetRetroactiveLoggedDays(userID string, startAt string) ([]UserLoggedDaysDTO, error)
 	GetBasicUserInfo(ctx context.Context, token string) (ID42 string, login string, err error)
+	ExchangeCodeForToken(ctx context.Context, code string) (string, error)
 }
