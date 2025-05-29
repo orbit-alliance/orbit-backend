@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
 )
 
 type sheetResponse struct {
@@ -93,50 +91,4 @@ func getUserPresences(token string, userId int64) (sheetResponse, error) {
 		return data, fmt.Errorf("error decoding JSON response: %w", err)
 	}
 	return data, nil
-}
-
-func GetBy42ID(ID42 string) (user.UserPresenceInEventDTO, error) {
-	token, err := getToken()
-	if err != nil {
-		return user.UserPresenceInEventDTO{}, ErrToGetToken
-	}
-	var headerAjustment int = 2
-	var userId int = -1
-	users, err := getAllUsers(token)
-
-	if err != nil {
-		return user.UserPresenceInEventDTO{}, ErrGettingAllUsers
-	}
-	for i, row := range users.Values {
-		if len(row) > 0 && row[0] == ID42 {
-			userId = i + headerAjustment
-			break
-		}
-	}
-	if userId == -1 {
-		return user.UserPresenceInEventDTO{}, ErrUserNotFound
-	}
-	eventData, err := getAllEvents(token)
-	if err != nil {
-		return user.UserPresenceInEventDTO{}, ErrGettingAllEvents
-	}
-	presences, err := getUserPresences(token, int64(userId))
-	if err != nil {
-		return user.UserPresenceInEventDTO{}, ErrGettingUserPresences
-	}
-	var userPresence user.UserPresenceInEventDTO
-	for i, _ := range eventData.Values[0] {
-		if i < len(presences.Values) && len(presences.Values[i]) > 0 {
-			userPresence.Events = append(userPresence.Events, struct {
-				Name        string `json:"name"`
-				Date        string `json:"date"`
-				HasPresence bool   `json:"has_presence"`
-			}{
-				Name:        eventData.Values[0][i],
-				Date:        eventData.Values[1][i],
-				HasPresence: presences.Values[0][i] == "TRUE",
-			})
-		}
-	}
-	return userPresence, nil
 }
