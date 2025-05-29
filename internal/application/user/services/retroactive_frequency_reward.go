@@ -39,17 +39,20 @@ const (
 	SEQUENCE_42_REWARD = "42 dias Consecutivos de Presença"
 )
 
-// Não sei como deveria fazer para pegar as recompensas geradas do seed.
-func getReward(rewardId string, rewardList []coin.GoodAction) coin.GoodAction {
+func getReward(rewardName string, rewardList []coin.GoodAction) (coin.GoodAction, error) {
 	var rewardCopy coin.GoodAction
-
+	var found bool
 	for _, reward := range rewardList {
-		if reward.Name == rewardId {
+		if reward.Name == rewardName {
 			rewardCopy = reward
+			found = true
 			break
 		}
 	}
-	return rewardCopy
+	if !found {
+		return coin.GoodAction{}, ErrGoodActionNotFound
+	}
+	return rewardCopy, nil
 }
 
 func compareDates(start string, end string) bool {
@@ -68,7 +71,10 @@ func compareDates(start string, end string) bool {
 	return false
 }
 
-func getRetroactiveReward(user user.User, logList []user.UserLoggedDaysDTO, rewardList []coin.GoodAction) (string, int, []coin.GoodAction) {
+func getRetroactiveReward(user user.User, logList []user.UserLoggedDaysDTO, rewardList []coin.GoodAction) (string, int, []coin.GoodAction, error) {
+	if len(logList) == 0 {
+		return "", 0, nil, ErrUserNotHasStartDate
+	}
 	var lastLogin = logList[0].Date
 	var currentStreak int = user.CurrentStreak
 	var lastDate string = user.LastLoginIn42
@@ -82,14 +88,26 @@ func getRetroactiveReward(user user.User, logList []user.UserLoggedDaysDTO, rewa
 		}
 
 		if currentStreak == 26 {
-			groupGoodActions = append(groupGoodActions, getReward(SEQUENCE_26_REWARD, rewardList))
+			goodAction, err := getReward(SEQUENCE_26_REWARD, rewardList)
+			if err != nil {
+				return "", 0, nil, err
+			}
+			groupGoodActions = append(groupGoodActions, goodAction)
 		} else if currentStreak == 42 {
-			groupGoodActions = append(groupGoodActions, getReward(SEQUENCE_42_REWARD, rewardList))
+			goodAction, err := getReward(SEQUENCE_42_REWARD, rewardList)
+			if err != nil {
+				return "", 0, nil, err
+			}
+			groupGoodActions = append(groupGoodActions, goodAction)
 		}
-		groupGoodActions = append(groupGoodActions, getReward(DAY_REWARD, rewardList))
+		goodAction, err := getReward(DAY_REWARD, rewardList)
+		if err != nil {
+			return "", 0, nil, err
+		}
+		groupGoodActions = append(groupGoodActions, goodAction)
 		lastDate = log.Date
 	}
-	return lastLogin, currentStreak, groupGoodActions
+	return lastLogin, currentStreak, groupGoodActions, nil
 }
 
 func (s *RetroactiveFrequencyRewardService) ApplyRetroactiveFrequencyRewardHandler(ctx context.Context, userID string) error {
@@ -108,7 +126,10 @@ func (s *RetroactiveFrequencyRewardService) ApplyRetroactiveFrequencyRewardHandl
 		return err
 	}
 
-	newLastLogin, newStreak, groupGoodActions := getRetroactiveReward(*usr, logList, rewardList)
+	newLastLogin, newStreak, groupGoodActions, err := getRetroactiveReward(*usr, logList, rewardList)
+	if err != nil {
+		return err
+	}
 
 	for _, action := range groupGoodActions {
 		evt, userGoodAction, err := usr.DoFrequencyReward(newLastLogin, newStreak, action)
