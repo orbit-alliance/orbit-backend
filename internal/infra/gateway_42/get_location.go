@@ -7,8 +7,8 @@ import (
 	"net/http"
 )
 
-func getLocationByUserID(startAt, endAt, userID, token string) (locationResponse, error) {
-	url := fmt.Sprintf("https://api.intra.42.fr/v2/users/%s/locations_stats?begin_at=%s&end_at=%s", userID, startAt, endAt)
+func getLocationByUserID(startAt, endAt, user42ID, token string) (locationResponse, error) {
+	url := fmt.Sprintf("https://api.intra.42.fr/v2/users/%s/locations_stats?begin_at=%s&end_at=%s", user42ID, startAt, endAt)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

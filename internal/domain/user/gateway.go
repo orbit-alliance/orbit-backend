@@ -31,8 +31,18 @@ type UserLoggedDaysDTO struct {
 	Date string
 }
 
+type UserPresenceInEventDTO struct {
+	Name        string
+	Date        string
+	HasPresence bool
+}
+
 type Api42Gateway interface {
 	GetRetroactiveBonusProject(userID string) ([]UserProjectBonusDTO, error)
 	GetRetroactiveLoggedDays(userID string, startAt string) ([]UserLoggedDaysDTO, error)
 	GetBasicUserInfo(ctx context.Context, token string) (ID42 string, login string, err error)
+}
+
+type ApiGoogleGateway interface {
+	GetRetroativePresencesBy42ID(ID42 string) ([]UserPresenceInEventDTO, error)
 }

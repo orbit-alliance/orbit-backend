@@ -6,14 +6,14 @@ import (
 	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
 )
 
-func (r *Gateway42) GetRetroactiveBonusProject(userID string) ([]user.UserProjectBonusDTO, error) {
+func (r *Gateway42) GetRetroactiveBonusProject(user42ID string) ([]user.UserProjectBonusDTO, error) {
 	token, err := getToken()
 	if err != nil {
 		return nil, ErrFailToCreate42Token
 	}
 
 	bonusList := []user.UserProjectBonusDTO{}
-	apiData, err := getUserByID(userID, token)
+	apiData, err := getUserByID(user42ID, token)
 
 	if err != nil {
 		return nil, ErrFailToGetUserIn42
@@ -31,7 +31,7 @@ func (r *Gateway42) GetRetroactiveBonusProject(userID string) ([]user.UserProjec
 	return bonusList, nil
 }
 
-func (r *Gateway42) GetRetroactiveLoggedDays(userID string, startAt string) ([]user.UserLoggedDaysDTO, error) {
+func (r *Gateway42) GetRetroactiveLoggedDays(user42ID string, startAt string) ([]user.UserLoggedDaysDTO, error) {
 	token, err := getToken()
 	endAt := time.Now().UTC().Format(time.RFC3339Nano)
 	dayList := []user.UserLoggedDaysDTO{}
@@ -40,7 +40,7 @@ func (r *Gateway42) GetRetroactiveLoggedDays(userID string, startAt string) ([]u
 		return nil, ErrFailToCreate42Token
 	}
 
-	apiData, err := getLocationByUserID(startAt, endAt, userID, token)
+	apiData, err := getLocationByUserID(startAt, endAt, user42ID, token)
 
 	if err != nil {
 		return nil, ErrFailToGetLocationIn42
