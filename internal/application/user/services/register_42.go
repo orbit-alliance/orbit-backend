@@ -28,42 +28,42 @@ func NewRegister42Service(
 		ethGateway:   ethGateway,
 	}
 }
-func (s *Register42Service) Register42User(token42, walletAddress string) error {
-	ctx := context.Background()
+func (s *Register42Service) Register42User(ctx context.Context, token42, walletAddress string) (string, string, error) {
 
 	err := s.checkIfWalletAlreadyRegistered(ctx, walletAddress)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 
 	ID42, login, err := s.api42Gateway.GetBasicUserInfo(ctx, token42)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 
 	usr, err := s.userRepo.FindByID42(ctx, ID42)
 	if err != nil {
-		return err
+		return "", "", err
 	}
+
 	if usr != nil {
-		s.changeWalletAddress(ctx, usr, walletAddress)
-		return nil
+		err := s.changeWalletAddress(ctx, usr, walletAddress)
+		return ID42, login, err
 	}
 
 	coinStatus, err := s.ethGateway.GetCoinsStatusByWallet(ctx, walletAddress)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 
 	usr = user.NewUser(shared.NewMongoID(), ID42, walletAddress, login, *coinStatus, []nft.NFT{})
 	err = s.userRepo.Save(ctx, usr)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 
 	s.eventBus.Publish(ctx, user.NewUser42Registered(usr))
 
-	return nil
+	return ID42, login, nil
 }
 
 func (s *Register42Service) checkIfWalletAlreadyRegistered(ctx context.Context, wallet string) error {
