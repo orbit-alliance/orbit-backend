@@ -15,11 +15,10 @@ import (
 	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
 	"github.com/orbit-alliance/orbit-backend/internal/infra/db"
 	repo "github.com/orbit-alliance/orbit-backend/internal/infra/db/repos"
+	"github.com/orbit-alliance/orbit-backend/internal/infra/gateway_42"
 	"github.com/orbit-alliance/orbit-backend/internal/infra/web3"
 
 	seed "github.com/orbit-alliance/orbit-backend/internal/infra/db/seeds"
-
-	gateway_42 "github.com/orbit-alliance/orbit-backend/internal/infra/gateway"
 
 	usercontroller "github.com/orbit-alliance/orbit-backend/internal/interface/http/controllers/user"
 	"github.com/orbit-alliance/orbit-backend/internal/interface/http/routes"
