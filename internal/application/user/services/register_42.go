@@ -28,9 +28,14 @@ func NewRegister42Service(
 		ethGateway:   ethGateway,
 	}
 }
-func (s *Register42Service) Register42User(ctx context.Context, token42, walletAddress string) (string, string, error) {
+func (s *Register42Service) Register42User(ctx context.Context, code42, walletAddress string) (string, string, error) {
 
 	err := s.checkIfWalletAlreadyRegistered(ctx, walletAddress)
+	if err != nil {
+		return "", "", err
+	}
+
+	token42, err := s.api42Gateway.ExchangeCodeForToken(ctx, code42)
 	if err != nil {
 		return "", "", err
 	}

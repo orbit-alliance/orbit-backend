@@ -65,10 +65,7 @@ func compareDates(start string, end string) bool {
 		return false
 	}
 	timeStart = timeStart.AddDate(0, 0, 1)
-	if timeStart.Equal(timeEnd) {
-		return true
-	}
-	return false
+	return timeStart.Equal(timeEnd)
 }
 
 func getRetroactiveReward(user user.User, logList []user.UserLoggedDaysDTO, rewardList []coin.GoodAction) (string, int, []coin.GoodAction, error) {

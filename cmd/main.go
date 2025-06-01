@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 
@@ -20,7 +21,7 @@ import (
 
 	seed "github.com/orbit-alliance/orbit-backend/internal/infra/db/seeds"
 
-	usercontroller "github.com/orbit-alliance/orbit-backend/internal/interface/http/controllers/user"
+	user_controller "github.com/orbit-alliance/orbit-backend/internal/interface/http/controllers/user"
 	"github.com/orbit-alliance/orbit-backend/internal/interface/http/routes"
 )
 
@@ -62,7 +63,7 @@ func main() {
 
 	// Serviços que encapsulam a lógica de negócios
 	transferCoinsService := services.NewTransferCoinsService(userRepo, transferRepo, eventBus)
-	//register42Service := services.NewRegister42Service(userRepo, eventBus, auth42Gateway, ethGateway)
+	register42Service := services.NewRegister42Service(userRepo, eventBus, auth42Gateway, ethGateway)
 
 	// Publicador de ações de boas práticas na blockchain
 	onChainPublisher := services.NewOnChainPublisher(ethGateway)
@@ -78,12 +79,16 @@ func main() {
 	// Semente de dados iniciais para ações de boas práticas
 	seed.SeedGoodActions(context.TODO(), goodActionRepo)
 
-	// Handlers para as rotas de autenticação da 42
-	auth42Handler := usercontroller.NewAuth42Handler(auth42Gateway)
+	userHandler := user_controller.NewUserHandler(register42Service)
 	router := mux.NewRouter()
-	routes.RegisterUserRoutes(router, auth42Handler)
+	routes.RegisterUserRoutes(router, userHandler)
+
+	corsAllowedOrigins := handlers.AllowedOrigins([]string{"*"}) // ou especifique seu frontend: []string{"http://localhost:3000"}
+	corsAllowedMethods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
+	corsAllowedHeaders := handlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
 
 	// Start HTTP server, para escutar na porta definida
 	fmt.Println("API Orbit rodando em http://localhost:" + APP_PORT)
-	log.Fatal(http.ListenAndServe(":"+APP_PORT, router))
+	log.Fatal(http.ListenAndServe(":"+APP_PORT, handlers.CORS(corsAllowedOrigins, corsAllowedMethods, corsAllowedHeaders)(router)))
+
 }
