@@ -30,7 +30,7 @@ func (g *Gateway42) ExchangeCodeForToken(ctx context.Context, code string) (stri
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	// Header Authorization → Basic base64(client_id:client_secret)
-	auth := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", clientID, clientSecret)))
+	auth := base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "%s:%s", clientID, clientSecret))
 	req.Header.Set("Authorization", "Basic "+auth)
 
 	client := &http.Client{}
