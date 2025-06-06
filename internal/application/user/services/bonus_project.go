@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/orbit-alliance/orbit-backend/internal/domain/coin"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
@@ -120,4 +121,36 @@ func (s *BonusProjectService) findSameProject(bonusProject user.UserProjectBonus
 		}
 	}
 	return nil
+}
+
+func (s *BonusProjectService) DailyBonusProjectJob() {
+	ctx := context.Background()
+
+	users, err := s.userRepo.LoadAll(ctx)
+	if err != nil {
+		fmt.Printf("Erro ao carregar usuários: %v\n", err)
+		return
+	}
+
+	const maxConcurrency = 10
+	sem := make(chan struct{}, maxConcurrency)
+	var wg sync.WaitGroup
+
+	for _, u := range users {
+		sem <- struct{}{} // ocupa uma "vaga" do semáforo
+		wg.Add(1)
+
+		go func(u *user.User) {
+			defer func() {
+				<-sem     // libera a vaga
+				wg.Done() // sinaliza fim da goroutine
+			}()
+
+			s.ApplyRetroactiveBonusProject(ctx, &user.User42Registered{
+				User: u, // importante: desreferenciar o ponteiro aqui
+			})
+		}(u)
+	}
+
+	wg.Wait() // aguarda todas as goroutines finalizarem
 }
