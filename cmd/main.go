@@ -113,9 +113,13 @@ func startJobs(bonusProjectService *services.BonusProjectService) {
 	c := cron.New()
 
 	// Agendar para rodar todos os dias às 00:01
-	c.AddFunc("1 0 * * *", func() {
+	_, err := c.AddFunc("1 0 * * *", func() {
 		bonusProjectService.DailyBonusProjectJob()
 	})
+
+	if err != nil {
+		log.Fatalf("Erro ao agendar a tarefa diária: %v", err)
+	}
 
 	c.Start()
 }
