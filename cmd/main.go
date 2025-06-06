@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/robfig/cron/v3"
 
 	"github.com/orbit-alliance/orbit-backend/internal/application/user/services"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
@@ -90,6 +91,9 @@ func main() {
 	// Inscreve o serviço de bônus de projetos para receber eventos de registro de usuários
 	eventBus.Subscribe(user.User42Registered{}.EventType(), userBonusProjectService.ApplyRetroactiveBonusProject)
 
+	// Inicia o serviço de bônus de projetos para aplicar bônus retroativos
+	startJobs(userBonusProjectService)
+
 	// Handlers para as rotas de autenticação da 42
 	userHandler := user_controller.NewUserHandler(register42Service)
 	router := mux.NewRouter()
@@ -103,4 +107,19 @@ func main() {
 	fmt.Println("API Orbit rodando em http://localhost:" + APP_PORT)
 	log.Fatal(http.ListenAndServe(":"+APP_PORT, handlers.CORS(corsAllowedOrigins, corsAllowedMethods, corsAllowedHeaders)(router)))
 
+}
+
+func startJobs(bonusProjectService *services.BonusProjectService) {
+	c := cron.New()
+
+	// Agendar para rodar todos os dias às 00:01
+	_, err := c.AddFunc("1 0 * * *", func() {
+		bonusProjectService.DailyBonusProjectJob()
+	})
+
+	if err != nil {
+		log.Fatalf("Erro ao agendar a tarefa diária: %v", err)
+	}
+
+	c.Start()
 }

@@ -12,6 +12,7 @@ type UserRepository interface {
 	FindByID42(ctx context.Context, id42 string) (*User, error)
 	FindByWallet(ctx context.Context, wallet string) (*User, error)
 	FindByUsername(ctx context.Context, username string) (*User, error)
+	LoadAll(ctx context.Context) ([]*User, error)
 }
 
 type UserGoodActionRepository interface {

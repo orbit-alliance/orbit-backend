@@ -94,3 +94,26 @@ func (r *UserRepository) FindByUsername(ctx context.Context, username string) (*
 	}
 	return &user, nil
 }
+
+func (r *UserRepository) LoadAll(ctx context.Context) ([]*user.User, error) {
+	cursor, err := r.collection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var users []*user.User
+	for cursor.Next(ctx) {
+		var user user.User
+		if err := cursor.Decode(&user); err != nil {
+			return nil, err
+		}
+		users = append(users, &user)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
