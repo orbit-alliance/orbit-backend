@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/orbit-alliance/orbit-backend/internal/domain/coin"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
@@ -35,31 +36,44 @@ func NewBonusProjectService(
 	}
 }
 
-func (s *BonusProjectService) ApplyRetroactiveBonusProject(userID string) error {
+func (s *BonusProjectService) ApplyRetroactiveBonusProject(ctx context.Context, event shared.DomainEvent) {
 
-	ctx := context.Background()
+	evt, ok := event.(*user.User42Registered)
+	if !ok {
+		return
+	}
+
+	userID := shared.ObjectIDToString(evt.User.ID)
 
 	usr, err := s.userRepo.FindByID(ctx, userID)
 	if err != nil {
-		return err
+		fmt.Printf("Error finding user with ID %s: %v\n", userID, err)
+		return
 	}
 
 	bonusProjects, err := s.api42Gateway.GetRetroactiveBonusProject(usr.ID42)
 	if err != nil {
-		return err
+		fmt.Printf("Error fetching retroactive bonus projects for user %s: %v\n", usr.ID42, err)
+		return
 	}
 
 	didProjects, err := s.userProjectRepo.LoadByUserID(ctx, shared.ObjectIDToString(usr.ID))
 	if err != nil {
-		return err
+		fmt.Printf("Error loading user projects for user %s: %v\n", usr.ID42, err)
+		return
 	}
 
 	goodAction, err := s.goodActionRepo.LoadByName(ctx, "Bônus de Projeto")
 	if err != nil {
-		return err
+		fmt.Printf("Error loading good action 'Bônus de Projeto': %v\n", err)
+		return
 	}
 
-	return s.processBonusProjects(ctx, usr, bonusProjects, didProjects, goodAction)
+	err = s.processBonusProjects(ctx, usr, bonusProjects, didProjects, goodAction)
+	if err != nil {
+		fmt.Printf("Error processing bonus projects for user %s: %v\n", usr.ID42, err)
+		return
+	}
 }
 
 func (s *BonusProjectService) processBonusProjects(ctx context.Context, usr *user.User, bonusProjects []user.UserProjectBonusDTO, didProjects []*user.UserProject, goodAction *coin.GoodAction) error {
