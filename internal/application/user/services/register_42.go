@@ -87,6 +87,11 @@ func (s *Register42Service) changeWalletAddress(ctx context.Context, usr *user.U
 	if err != nil {
 		return err
 	}
+
+	if err := s.userRepo.Save(ctx, usr); err != nil {
+		return err
+	}
+
 	s.eventBus.Publish(ctx, evnt)
 
 	return nil
