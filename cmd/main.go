@@ -65,10 +65,6 @@ func main() {
 	transferCoinsService := services.NewTransferCoinsService(userRepo, transferRepo, eventBus)
 	register42Service := services.NewRegister42Service(userRepo, eventBus, auth42Gateway, ethGateway)
 
-	// Publicador de ações de boas práticas na blockchain
-	onChainPublisher := services.NewOnChainPublisher(ethGateway)
-	eventBus.Subscribe(user.DidGoodAction{}.EventType(), onChainPublisher.GoodActionPublisher)
-
 	// Inicializa o EthGateway para ouvir eventos de transferências
 	ethGateway.TransferListener(context.TODO(), func(event user.TransferDTO) {
 		if err := transferCoinsService.TransferCoins(event); err != nil {
@@ -79,6 +75,22 @@ func main() {
 	// Semente de dados iniciais para ações de boas práticas
 	seed.SeedGoodActions(context.TODO(), goodActionRepo)
 
+	userBonusProjectService := services.NewBonusProjectService(
+		userRepo,
+		eventBus,
+		repo.NewUserProjectRepository(db.Database),
+		repo.NewUserGoodActionRepository(db.Database),
+		goodActionRepo,
+		auth42Gateway,
+	)
+
+	// Publicador de ações de boas práticas na blockchain
+	onChainPublisher := services.NewOnChainPublisher(ethGateway)
+	eventBus.Subscribe(user.DidGoodAction{}.EventType(), onChainPublisher.GoodActionPublisher)
+	// Inscreve o serviço de bônus de projetos para receber eventos de registro de usuários
+	eventBus.Subscribe(user.User42Registered{}.EventType(), userBonusProjectService.ApplyRetroactiveBonusProject)
+
+	// Handlers para as rotas de autenticação da 42
 	userHandler := user_controller.NewUserHandler(register42Service)
 	router := mux.NewRouter()
 	routes.RegisterUserRoutes(router, userHandler)

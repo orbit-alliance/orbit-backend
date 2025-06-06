@@ -11,4 +11,5 @@ var (
 	ErrUserAlreadyExists       = errors.New("user: user already exists")
 	ErrWalletAlreadyRegistered = errors.New("user: wallet already registered")
 	ErrSameWalletAddress       = errors.New("user: same wallet address provided")
+	ErrInvalidEventType        = errors.New("user: invalid event type")
 )
