@@ -3,6 +3,6 @@ package services
 import "errors"
 
 var (
-	ErrGoodActionNotFound  = errors.New("Good action not found")
-	ErrUserNotHasStartDate = errors.New("User does not have a start date")
+	ErrGoodActionNotFound  = errors.New("good action not found")
+	ErrUserNotHasStartDate = errors.New("user does not have a start date")
 )

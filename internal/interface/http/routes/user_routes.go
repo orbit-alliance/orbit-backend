@@ -5,10 +5,7 @@ import (
 	usercontroller "github.com/orbit-alliance/orbit-backend/internal/interface/http/controllers/user"
 )
 
-// RegisterUserRoutes registra as rotas relacionadas ao usuário no roteador fornecido
-// e associa o Auth42Handler para lidar com as requisições de autenticação via 42.
-// Agora a função recebe o handler como parâmetro
-func RegisterUserRoutes(router *mux.Router, auth42Handler *usercontroller.Auth42Handler) {
-	router.HandleFunc("/auth/42/login", auth42Handler.Login).Methods("GET")
-	router.HandleFunc("/auth/42/callback", auth42Handler.Callback).Methods("GET")
+func RegisterUserRoutes(router *mux.Router, userController *usercontroller.UserHandler) {
+	router.HandleFunc("/api/v0/user", userController.Register42User).Methods("POST")
+
 }
