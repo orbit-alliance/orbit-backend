@@ -44,13 +44,13 @@ func (s *TransferCoinsService) TransferCoins(transfer user.TransferDTO) error {
 	if err != nil {
 		return err
 	}
-	s.eventBus.Publish(ctx, evt)
+	s.eventBus.Publish(evt)
 
 	evt2, err := receiver.ReceiveCoins(sender, transfer.Amount)
 	if err != nil {
 		return err
 	}
-	s.eventBus.Publish(ctx, evt2)
+	s.eventBus.Publish(evt2)
 
 	if err := s.userRepo.Save(ctx, receiver); err != nil {
 		return err

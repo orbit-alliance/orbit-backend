@@ -66,7 +66,7 @@ func (s *Register42Service) Register42User(ctx context.Context, code42, walletAd
 		return "", "", err
 	}
 
-	s.eventBus.Publish(ctx, user.NewUser42Registered(usr))
+	s.eventBus.Publish(user.NewUser42Registered(usr))
 
 	return ID42, login, nil
 }
@@ -92,7 +92,7 @@ func (s *Register42Service) changeWalletAddress(ctx context.Context, usr *user.U
 		return err
 	}
 
-	s.eventBus.Publish(ctx, evnt)
+	s.eventBus.Publish(evnt)
 
 	return nil
 }

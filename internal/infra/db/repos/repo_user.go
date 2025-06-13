@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
@@ -33,6 +34,8 @@ func (r *UserRepository) Save(ctx context.Context, user *user.User) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Printf("User with ID %s saved successfully.\n", user.ID.Hex())
 
 	return nil
 }

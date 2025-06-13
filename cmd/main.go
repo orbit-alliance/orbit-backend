@@ -45,14 +45,10 @@ func main() {
 	// EventBus e gateways, criados para gerenciar eventos e interações com a blockchain
 	eventBus := shared.NewEventBus()
 
-	// Cria o EthGateway mockado
-	ethGateway := web3.NewMockEthGateway()
-
-	// Cria o EthGateway para interações com a blockchain Ethereum
-	// ethGateway, err := web3.NewEthGateway(64)
-	// if err != nil {
-	// 	log.Fatal("Erro ao criar o EthGateway", err)
-	// }
+	ethGateway, err := web3.NewEthGateway()
+	if err != nil {
+		log.Fatal("Erro ao criar o EthGateway", err)
+	}
 
 	// Cria o Api42Gateway para interações com a API da 42 de autenticação
 	auth42Gateway := gateway_42.NewGateway42()

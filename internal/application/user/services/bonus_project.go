@@ -39,6 +39,8 @@ func NewBonusProjectService(
 
 func (s *BonusProjectService) ApplyRetroactiveBonusProject(ctx context.Context, event shared.DomainEvent) {
 
+	fmt.Println("Applying retroactive bonus project...")
+
 	evt, ok := event.(*user.User42Registered)
 	if !ok {
 		return
@@ -102,7 +104,7 @@ func (s *BonusProjectService) applySingleBonus(ctx context.Context, usr *user.Us
 	}
 
 	if evt != nil {
-		s.eventBus.Publish(ctx, evt)
+		s.eventBus.Publish(evt)
 
 		if err := s.userRepo.Save(ctx, usr); err != nil {
 			return err

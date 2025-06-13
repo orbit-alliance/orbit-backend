@@ -134,7 +134,7 @@ func (s *RetroactiveFrequencyRewardService) ApplyRetroactiveFrequencyRewardHandl
 			return err
 		}
 		if evt != nil {
-			s.eventBus.Publish(ctx, evt)
+			s.eventBus.Publish(evt)
 
 			if err := s.userRepo.Save(ctx, usr); err != nil {
 				return err

@@ -49,12 +49,13 @@ func (eb *EventBus) Subscribe(eventType string, handler EventHandler) {
 }
 
 // Publish triggers an event to registered handlers
-func (eb *EventBus) Publish(ctx context.Context, event DomainEvent) {
+func (eb *EventBus) Publish(event DomainEvent) {
 	eb.mu.RLock()
 	defer eb.mu.RUnlock()
 
 	if handlers, ok := eb.handlers[event.EventType()]; ok {
 		for _, handler := range handlers {
+			ctx := context.Background()
 			go handler(ctx, event)
 		}
 	}
