@@ -2,11 +2,14 @@ package services
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/orbit-alliance/orbit-backend/internal/domain/coin"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
+	"golang.org/x/sync/errgroup"
 )
 
 type RetroactiveFrequencyRewardService struct {
@@ -107,13 +110,13 @@ func getRetroactiveReward(user user.User, logList []user.UserLoggedDaysDTO, rewa
 	return lastLogin, currentStreak, groupGoodActions, nil
 }
 
-func (s *RetroactiveFrequencyRewardService) ApplyRetroactiveFrequencyRewardHandler(ctx context.Context, userID string) error {
+func (s *RetroactiveFrequencyRewardService) retroactiveFrequencyRewardHandler(ctx context.Context, userID string, startAt string) error {
 	var usr, err = s.userRepo.FindByID(ctx, userID)
 	if err != nil {
 		return err
 	}
 
-	logList, err := s.userGateway.GetRetroactiveLoggedDays(usr.ID42, usr.LastLoginIn42)
+	logList, err := s.userGateway.GetRetroactiveLoggedDays(usr.ID42, startAt)
 	if err != nil {
 		return err
 	}
@@ -128,6 +131,13 @@ func (s *RetroactiveFrequencyRewardService) ApplyRetroactiveFrequencyRewardHandl
 		return err
 	}
 
+	err = s.userRepo.SaveLogin(ctx, usr.ID, newLastLogin, newStreak)
+	if err != nil {
+		fmt.Printf("Error saving login for user %s: %v\n", usr.ID.Hex(), err)
+		return err
+	}
+
+	totalTokens := uint64(0)
 	for _, action := range groupGoodActions {
 		evt, userGoodAction, err := usr.DoFrequencyReward(newLastLogin, newStreak, action)
 		if err != nil {
@@ -135,14 +145,80 @@ func (s *RetroactiveFrequencyRewardService) ApplyRetroactiveFrequencyRewardHandl
 		}
 		if evt != nil {
 			s.eventBus.Publish(evt)
-
-			if err := s.userRepo.Save(ctx, usr); err != nil {
-				return err
-			}
+			totalTokens += action.RewardAmount
 			if err := s.userGoodActionRepo.Save(ctx, userGoodAction); err != nil {
 				return err
 			}
 		}
 	}
+
+	if totalTokens > 0 {
+		if err := s.userRepo.EarnTokens(ctx, usr.ID, totalTokens); err != nil {
+			fmt.Printf("Error adding tokens for user %s: %v\n", usr.ID.Hex(), err)
+			return err
+		}
+	}
 	return nil
+}
+
+func (s *RetroactiveFrequencyRewardService) DailyFrequencyRewardJob() {
+	ctx := context.Background()
+	const maxConcurrency = 10
+
+	// 1. Carrega todos os usuários
+	users, err := s.userRepo.LoadAll(ctx)
+	if err != nil {
+		fmt.Printf("Erro ao carregar usuários: %v\n", err)
+		return
+	}
+
+	// 2. Descobre a data‑alvo (“ontem” no fuso do servidor)
+	startAt := time.Now().AddDate(0, 0, -1).Format("2006-01-02") // “YYYY-MM-DD”
+
+	// 3. Cria errgroup com limite de concorrência
+	g, gctx := errgroup.WithContext(ctx)
+	sem := make(chan struct{}, maxConcurrency)
+
+	for _, u := range users {
+		u := u            // captura
+		sem <- struct{}{} // bloqueia se já tiver 10 goroutines
+
+		g.Go(func() error {
+			defer func() { <-sem }() // libera vaga
+			// IMPORTANTE: use o contexto do errgroup (propaga cancelamentos)
+			if err := s.retroactiveFrequencyRewardHandler(gctx, u.ID.Hex(), startAt); err != nil {
+				// loga mas deixa o errgroup propagar
+				fmt.Printf("Erro em usuário %s: %v\n", u.ID.Hex(), err)
+				return err
+			}
+			return nil
+		})
+	}
+
+	// 4. Aguarda todas concluírem; se alguma falhou, imprime
+	if err := g.Wait(); err != nil {
+		fmt.Printf("DailyFrequencyRewardJob terminou com erro: %v\n", err)
+	} else {
+		fmt.Println("DailyFrequencyRewardJob concluído com sucesso.")
+	}
+}
+
+func (s *RetroactiveFrequencyRewardService) ApplyRetroactiveFrequencyReward(ctx context.Context, event shared.DomainEvent) {
+
+	evt, ok := event.(*user.User42Registered)
+	if !ok {
+		return
+	}
+
+	userID := shared.ObjectIDToString(evt.User.ID)
+	startDate := os.Getenv("PROJECT_START_DATE")
+	if startDate == "" {
+		panic("PROJECT_START_DATE environment variable is not set")
+	}
+
+	if err := s.retroactiveFrequencyRewardHandler(ctx, userID, startDate); err != nil {
+		fmt.Printf("Error applying retroactive frequency reward for user %s: %v\n", userID, err)
+		return
+	}
+
 }

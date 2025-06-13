@@ -106,7 +106,7 @@ func (s *BonusProjectService) applySingleBonus(ctx context.Context, usr *user.Us
 	if evt != nil {
 		s.eventBus.Publish(evt)
 
-		if err := s.userRepo.Save(ctx, usr); err != nil {
+		if err := s.userRepo.EarnTokens(ctx, usr.ID, goodAction.RewardAmount); err != nil {
 			return err
 		}
 		if err := s.userGoodActionRepo.Save(ctx, userGoodAction); err != nil {

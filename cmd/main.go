@@ -57,6 +57,8 @@ func main() {
 	userRepo := repo.NewUserRepository(db.Database)
 	transferRepo := repo.NewTransferRepository(db.Database)
 	goodActionRepo := repo.NewGoodActionRepository(db.Database)
+	userProjectRepo := repo.NewUserProjectRepository(db.Database)
+	userGoodActionRepo := repo.NewUserGoodActionRepository(db.Database)
 
 	// Serviços que encapsulam a lógica de negócios
 	transferCoinsService := services.NewTransferCoinsService(userRepo, transferRepo, eventBus)
@@ -75,10 +77,18 @@ func main() {
 	userBonusProjectService := services.NewBonusProjectService(
 		userRepo,
 		eventBus,
-		repo.NewUserProjectRepository(db.Database),
-		repo.NewUserGoodActionRepository(db.Database),
+		userProjectRepo,
+		userGoodActionRepo,
 		goodActionRepo,
 		auth42Gateway,
+	)
+
+	userFrequencyRewardService := services.NewRetroactiveFrequencyRewardService(
+		userRepo,
+		goodActionRepo,
+		userGoodActionRepo,
+		auth42Gateway,
+		eventBus,
 	)
 
 	// Publicador de ações de boas práticas na blockchain
@@ -86,9 +96,11 @@ func main() {
 	eventBus.Subscribe(user.DidGoodAction{}.EventType(), onChainPublisher.GoodActionPublisher)
 	// Inscreve o serviço de bônus de projetos para receber eventos de registro de usuários
 	eventBus.Subscribe(user.User42Registered{}.EventType(), userBonusProjectService.ApplyRetroactiveBonusProject)
+	// Inscreve o serviço de recompensas de frequência para receber eventos de registro de usuários
+	eventBus.Subscribe(user.User42Registered{}.EventType(), userFrequencyRewardService.ApplyRetroactiveFrequencyReward)
 
 	// Inicia o serviço de bônus de projetos para aplicar bônus retroativos
-	startJobs(userBonusProjectService)
+	dailyJobs(userBonusProjectService.DailyBonusProjectJob, userFrequencyRewardService.DailyFrequencyRewardJob)
 
 	// Handlers para as rotas de autenticação da 42
 	userHandler := user_controller.NewUserHandler(register42Service)
@@ -105,16 +117,14 @@ func main() {
 
 }
 
-func startJobs(bonusProjectService *services.BonusProjectService) {
+func dailyJobs(jobs ...shared.Job) {
 	c := cron.New()
 
-	// Agendar para rodar todos os dias às 00:01
-	_, err := c.AddFunc("1 0 * * *", func() {
-		bonusProjectService.DailyBonusProjectJob()
-	})
-
-	if err != nil {
-		log.Fatalf("Erro ao agendar a tarefa diária: %v", err)
+	for _, job := range jobs {
+		// “1 0 * * *”  →  minuto 1, hora 0, todos os dias
+		if _, err := c.AddFunc("1 0 * * *", job); err != nil {
+			log.Fatalf("Erro ao agendar tarefa diária: %v", err)
+		}
 	}
 
 	c.Start()

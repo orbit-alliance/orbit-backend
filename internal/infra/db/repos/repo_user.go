@@ -2,22 +2,30 @@ package repo
 
 import (
 	"context"
+	"sync"
 
 	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type UserRepository struct {
 	collection *mongo.Collection
+	lockMap    sync.Map
 }
 
 func NewUserRepository(db *mongo.Database) *UserRepository {
-	collection := db.Collection("Users")
+	collection := db.Collection("users")
 	return &UserRepository{collection: collection}
+}
+
+func (r *UserRepository) getMutex(id primitive.ObjectID) *sync.Mutex {
+	actual, _ := r.lockMap.LoadOrStore(id, &sync.Mutex{})
+	return actual.(*sync.Mutex)
 }
 
 func (r *UserRepository) Save(ctx context.Context, user *user.User) error {
@@ -37,12 +45,45 @@ func (r *UserRepository) Save(ctx context.Context, user *user.User) error {
 	return nil
 }
 
-func (r *UserRepository) FindByID(ctx context.Context, id string) (*user.User, error) {
+func (r *UserRepository) EarnTokens(ctx context.Context, id primitive.ObjectID, amount uint64) error {
 
+	filter := bson.M{"_id": id}
+	update := bson.M{
+		"$inc": bson.M{"coin_status.earned_by_actions": amount},
+	}
+
+	_, err := r.collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *UserRepository) SaveLogin(ctx context.Context, id primitive.ObjectID, lastLoginIn42 string, currentStreak int) error {
+
+	filter := bson.M{"_id": id}
+	update := bson.M{
+		"$set": bson.M{
+			"last_login_in_42": lastLoginIn42,
+			"current_streak":   currentStreak,
+		},
+	}
+	_, err := r.collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *UserRepository) FindByID(ctx context.Context, id string) (*user.User, error) {
 	idObj, err := shared.ObjectIDFromString(id)
 	if err != nil {
 		return nil, err
 	}
+	mu := r.getMutex(idObj)
+	mu.Lock()
+	defer mu.Unlock()
 
 	filter := bson.M{"_id": idObj}
 	var user user.User
