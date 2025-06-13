@@ -1,12 +1,13 @@
 package web3
 
 import (
-	"math/big"
+	"context"
 	"os"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
@@ -17,30 +18,42 @@ type EthGateway struct {
 	contractAddress common.Address
 }
 
-func NewEthGateway(chainID int64) (*EthGateway, error) {
-	rpcURL := os.Getenv("ETH_RPC_URL")
-	privateKey := os.Getenv("ETH_PRIVATE_KEY")
-	contractAddr := os.Getenv("CONTRACT_ADDRESS")
+func NewEthGateway() (*EthGateway, error) {
+	rpcURL := os.Getenv("ETH_RPC_URL") // http://127.0.0.1:8545
+	pkHex := strings.TrimPrefix(os.Getenv("ETH_PRIVATE_KEY"), "0x")
+	contractAddr := common.HexToAddress(os.Getenv("CONTRACT_ADDRESS"))
 
 	client, err := ethclient.Dial(rpcURL)
 	if err != nil {
 		return nil, err
 	}
 
-	auth, err := bind.NewTransactorWithChainID(strings.NewReader(privateKey), "", big.NewInt(chainID))
+	chainID, err := client.NetworkID(context.Background())
 	if err != nil {
 		return nil, err
 	}
 
-	contract, err := NewGalacto(common.HexToAddress(contractAddr), client)
+	// --> converte o HEX para *ecdsa.PrivateKey
+	pk, err := crypto.HexToECDSA(pkHex)
+	if err != nil {
+		return nil, err
+	}
+
+	// --> cria o signer já com o chain‑id correto
+	auth, err := bind.NewKeyedTransactorWithChainID(pk, chainID)
+	if err != nil {
+		return nil, err
+	}
+
+	galacto, err := NewGalacto(contractAddr, client)
 	if err != nil {
 		return nil, err
 	}
 
 	return &EthGateway{
 		client:          client,
-		contract:        contract,
+		contract:        galacto,
 		auth:            auth,
-		contractAddress: common.HexToAddress(contractAddr),
+		contractAddress: contractAddr,
 	}, nil
 }
