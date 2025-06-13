@@ -110,6 +110,7 @@ func (s *BonusProjectService) applySingleBonus(ctx context.Context, usr *user.Us
 			return err
 		}
 		if err := s.userGoodActionRepo.Save(ctx, userGoodAction); err != nil {
+			fmt.Printf("Error saving user good action: %v\n", err)
 			return err
 		}
 	}

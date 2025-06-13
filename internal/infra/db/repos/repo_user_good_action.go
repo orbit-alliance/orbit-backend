@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
 	"go.mongodb.org/mongo-driver/bson"
@@ -29,6 +30,7 @@ func (r *UserGoodActionRepository) Save(ctx context.Context, userGoodAction *use
 
 	_, err := r.collection.UpdateOne(ctx, filter, update, opts)
 	if err != nil {
+		fmt.Println("Error saving user good action:", err)
 		return err
 	}
 
