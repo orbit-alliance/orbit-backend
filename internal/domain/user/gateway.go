@@ -13,7 +13,7 @@ type TransferDTO struct {
 }
 
 type BlockchainGateway interface {
-	PublishUserAction(ctx context.Context, payload *UserGoodAction) error
+	PublishUserAction(ctx context.Context, payload *UserGoodAction)
 	TransferListener(ctx context.Context, handler func(event TransferDTO)) error
 	GetCoinsStatusByWallet(ctx context.Context, wallet string) (*coin.CoinStatus, error)
 }
