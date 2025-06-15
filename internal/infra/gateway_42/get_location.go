@@ -35,6 +35,5 @@ func (g *Gateway42) getLocationByUserID(
 	if err != nil {
 		return zero, err
 	}
-	fmt.Printf("response: %+v\n", resp)
 	return resp, nil
 }

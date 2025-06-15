@@ -1,52 +1,61 @@
 package gateway_42
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
+	"context"
+	"encoding/base64"
+	"fmt"
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 )
 
-func getToken() (string, error) {
-	clientID := os.Getenv("CLIENT_ID_42")
-	clientSecret := os.Getenv("CLIENT_SECRET_42")
-
-	if clientID == "" || clientSecret == "" {
+func (g *Gateway42) getToken(ctx context.Context) (string, error) {
+	id, secret := os.Getenv("CLIENT_ID_42"), os.Getenv("CLIENT_SECRET_42")
+	if id == "" || secret == "" {
 		return "", ErrSecretsIsNotDefined
 	}
 
-	form := url.Values{}
-	form.Add("grant_type", "client_credentials")
-	form.Add("client_id", clientID)
-	form.Add("client_secret", clientSecret)
+	/* -------------------------- cache in‑memory --------------------------- */
+	g.mu.Lock()
+	if g.token.AccessToken != "" && !g.token.expired() {
+		tok := g.token.AccessToken
+		g.mu.Unlock()
+		return tok, nil
+	}
+	g.mu.Unlock()
 
-	req, err := http.NewRequest("POST", "https://api.intra.42.fr/oauth/token", bytes.NewBufferString(form.Encode()))
+	/* --------------------------- prepara chamada -------------------------- */
+	form := url.Values{
+		"grant_type":    {"client_credentials"},
+		"client_id":     {id},
+		"client_secret": {secret},
+	}
+
+	auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(id+":"+secret))
+
+	/* ----------------------------- faz POST ------------------------------- */
+	t, err := doJSON[token42](
+		ctx,
+		g.client,
+		http.MethodPost,
+		"/oauth/token",
+		auth, // cabeçalho Authorization completo
+		form, // corpo x‑www‑form‑urlencoded
+		ok2xx,
+	)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("falha ao pedir token: %w", err)
 	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return "", errors.New("Error fetching token: " + resp.Status)
-	}
-
-	var data tokenResponse
-	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-		return "", err
-	}
-
-	if data.AccessToken == "" {
+	if t.AccessToken == "" {
 		return "", ErrNoAccessTokenInResponse
 	}
 
-	return data.AccessToken, nil
+	/* ---------------------------- grava cache ----------------------------- */
+	g.mu.Lock()
+	g.token = t
+	g.token.CreatedAt = int(time.Now().Unix()) // garante coerência
+	g.mu.Unlock()
+
+	return t.AccessToken, nil
 }

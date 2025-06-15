@@ -1,9 +1,14 @@
 package gateway_42
 
-import "time"
+import (
+	"sync"
+	"time"
+)
 
 type Gateway42 struct {
 	client *Client
+	mu     sync.Mutex
+	token  token42
 }
 
 func NewGateway42() *Gateway42 {

@@ -8,7 +8,8 @@ import (
 )
 
 func (g *Gateway42) GetRetroactiveBonusProject(user42ID string) ([]user.UserProjectBonusDTO, error) {
-	token, err := getToken()
+	ctx := context.Background()
+	token, err := g.getToken(ctx)
 	if err != nil {
 		return nil, ErrFailToCreate42Token
 	}
@@ -38,7 +39,7 @@ func (g *Gateway42) GetRetroactiveLoggedDays(
 ) ([]user.UserLoggedDaysDTO, error) {
 
 	ctx := context.Background()
-	token, err := getToken() // OK usar token client‑credentials
+	token, err := g.getToken(ctx) // OK usar token client‑credentials
 	if err != nil {
 		return nil, ErrFailToCreate42Token
 	}
