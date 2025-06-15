@@ -1,12 +1,13 @@
 package gateway_42
 
 import (
+	"context"
 	"time"
 
 	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
 )
 
-func (r *Gateway42) GetRetroactiveBonusProject(user42ID string) ([]user.UserProjectBonusDTO, error) {
+func (g *Gateway42) GetRetroactiveBonusProject(user42ID string) ([]user.UserProjectBonusDTO, error) {
 	token, err := getToken()
 	if err != nil {
 		return nil, ErrFailToCreate42Token
@@ -31,26 +32,33 @@ func (r *Gateway42) GetRetroactiveBonusProject(user42ID string) ([]user.UserProj
 	return bonusList, nil
 }
 
-func (r *Gateway42) GetRetroactiveLoggedDays(user42ID string, startAt string) ([]user.UserLoggedDaysDTO, error) {
-	token, err := getToken()
-	endAt := time.Now().UTC().Format(time.RFC3339Nano)
-	dayList := []user.UserLoggedDaysDTO{}
+func (g *Gateway42) GetRetroactiveLoggedDays(
+	user42ID string,
+	startAt string,
+) ([]user.UserLoggedDaysDTO, error) {
 
+	ctx := context.Background()
+	token, err := getToken() // OK usar token client‑credentials
 	if err != nil {
 		return nil, ErrFailToCreate42Token
 	}
 
-	apiData, err := getLocationByUserID(startAt, endAt, user42ID, token)
+	endAt := time.Now().UTC().Format(time.RFC3339Nano)
 
+	apiData, err := g.getLocationByUserID(
+		ctx,
+		user42ID, // ordem corrigida
+		startAt,
+		endAt,
+		token,
+	)
 	if err != nil {
 		return nil, ErrFailToGetLocationIn42
 	}
 
+	dayList := make([]user.UserLoggedDaysDTO, 0, len(apiData))
 	for date := range apiData {
-		newDay := user.UserLoggedDaysDTO{
-			Date: date,
-		}
-		dayList = append(dayList, newDay)
+		dayList = append(dayList, user.UserLoggedDaysDTO{Date: date})
 	}
 	return dayList, nil
 }

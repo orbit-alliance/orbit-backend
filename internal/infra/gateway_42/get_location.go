@@ -1,41 +1,40 @@
 package gateway_42
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
-	"io"
 	"net/http"
+	"net/url"
 )
 
-func getLocationByUserID(startAt, endAt, user42ID, token string) (locationResponse, error) {
-	url := fmt.Sprintf("https://api.intra.42.fr/v2/users/%s/locations_stats?begin_at=%s&end_at=%s", user42ID, startAt, endAt)
+func (g *Gateway42) getLocationByUserID(
+	ctx context.Context,
+	user42ID string,
+	startAt, endAt string, // ISO‑8601
+	token string,
+) (LocationResponse, error) {
 
-	req, err := http.NewRequest("GET", url, nil)
+	var zero LocationResponse // valor zero para retorno em erro
+
+	// compõe caminho + querystring
+	path := fmt.Sprintf("/v2/users/%s/locations_stats", user42ID)
+	q := url.Values{
+		"begin_at": {startAt},
+		"end_at":   {endAt},
+	}
+
+	resp, err := doJSON[LocationResponse](
+		ctx,
+		g.client, // HTTP client com retry/backoff
+		http.MethodGet,
+		path+"?"+q.Encode(),
+		"Bearer "+token, // cabeçalho Authorization completo
+		nil,             // GET não tem body
+		ok2xx,
+	)
 	if err != nil {
-		return nil, err
+		return zero, err
 	}
-	req.Header.Set("Authorization", "Bearer "+token)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, fmt.Errorf("error fetching token: %s", resp.Status)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var data locationResponse
-	if err := json.Unmarshal(body, &data); err != nil {
-		return nil, err
-	}
-
-	return data, nil
+	fmt.Printf("response: %+v\n", resp)
+	return resp, nil
 }

@@ -52,7 +52,7 @@ func (g *Gateway42) GetBasicUserInfo(
 		g.client,
 		http.MethodGet,
 		"/v2/me",
-		token,
+		"Bearer "+token,
 		nil,
 		ok2xx,
 	)

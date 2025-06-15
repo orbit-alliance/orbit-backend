@@ -15,7 +15,7 @@ import (
 func doJSON[Resp any](
 	ctx context.Context,
 	c *Client,
-	method, path, token string,
+	method, path, authHeader string,
 	body any,
 	statusOK func(int) bool,
 ) (Resp, error) {
@@ -59,8 +59,9 @@ func doJSON[Resp any](
 		} else if body != nil {
 			req.Header.Set("Content-Type", "application/json")
 		}
-		if token != "" {
-			req.Header.Set("Authorization", "Bearer "+token)
+
+		if authHeader != "" {
+			req.Header.Set("Authorization", authHeader)
 		}
 
 		// faz a requisição
