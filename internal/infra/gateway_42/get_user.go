@@ -1,9 +1,12 @@
 package gateway_42
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
 )
 
 func getUserByID(user42ID, token string) (userResponse, error) {
@@ -31,4 +34,33 @@ func getUserByID(user42ID, token string) (userResponse, error) {
 		return data, fmt.Errorf("error decoding JSON response: %w", err)
 	}
 	return data, nil
+}
+
+func (g *Gateway42) GetBasicUserInfo(
+	ctx context.Context,
+	token string,
+) (*user.UserBasicInfoDTO, error) {
+
+	// shape exato que a API devolve
+	type userMe struct {
+		ID    int    `json:"id"`
+		Login string `json:"login"`
+	}
+
+	u, err := doJSON[userMe](
+		ctx,
+		g.client,
+		http.MethodGet,
+		"/v2/me",
+		token,
+		nil,
+		ok2xx,
+	)
+	if err != nil {
+		return nil, ErrFailToGetUserIn42
+	}
+	return &user.UserBasicInfoDTO{
+		ID42:  fmt.Sprintf("%d", u.ID),
+		Login: u.Login,
+	}, nil
 }

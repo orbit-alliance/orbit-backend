@@ -45,16 +45,12 @@ func (h *UserHandler) Register42User(w http.ResponseWriter, r *http.Request) {
 
 	code42 := parts[1]
 
-	id42, login, err := h.registerService.Register42User(r.Context(), code42, payload.WalletAddress)
+	basicInfo, err := h.registerService.Register42User(r.Context(), code42, payload.WalletAddress)
 	if err != nil {
 		http.Error(w, "Erro ao registrar usuário: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	response := map[string]string{
-		"id42":  id42,
-		"login": login,
-	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(basicInfo)
 }

@@ -37,10 +37,15 @@ type UserPresenceInEventDTO struct {
 	HasPresence bool
 }
 
+type UserBasicInfoDTO struct {
+	ID42  string `json:"id42"`  // 42 ID
+	Login string `json:"login"` // 42 login
+}
+
 type Api42Gateway interface {
 	GetRetroactiveBonusProject(userID string) ([]UserProjectBonusDTO, error)
 	GetRetroactiveLoggedDays(userID string, startAt string) ([]UserLoggedDaysDTO, error)
-	GetBasicUserInfo(ctx context.Context, token string) (ID42 string, login string, err error)
+	GetBasicUserInfo(ctx context.Context, token string) (*UserBasicInfoDTO, error)
 	ExchangeCodeForToken(ctx context.Context, code string) (string, error)
 }
 

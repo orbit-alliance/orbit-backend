@@ -3,6 +3,8 @@ module github.com/orbit-alliance/orbit-backend
 go 1.24.2
 
 require (
+	github.com/cenkalti/backoff v2.2.1+incompatible
+	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/ethereum/go-ethereum v1.15.11
 	github.com/gorilla/handlers v1.5.2
 	github.com/gorilla/mux v1.8.1
