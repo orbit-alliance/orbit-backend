@@ -15,7 +15,7 @@ func (g *Gateway42) GetRetroactiveBonusProject(user42ID string) ([]user.UserProj
 	}
 
 	bonusList := []user.UserProjectBonusDTO{}
-	apiData, err := getUserByID(user42ID, token)
+	apiData, err := g.getUserByID(ctx, user42ID, token)
 
 	if err != nil {
 		return nil, ErrFailToGetUserIn42
@@ -39,7 +39,7 @@ func (g *Gateway42) GetRetroactiveLoggedDays(
 ) ([]user.UserLoggedDaysDTO, error) {
 
 	ctx := context.Background()
-	token, err := g.getToken(ctx) // OK usar token client‑credentials
+	token, err := g.getToken(ctx)
 	if err != nil {
 		return nil, ErrFailToCreate42Token
 	}
@@ -48,7 +48,7 @@ func (g *Gateway42) GetRetroactiveLoggedDays(
 
 	apiData, err := g.getLocationByUserID(
 		ctx,
-		user42ID, // ordem corrigida
+		user42ID,
 		startAt,
 		endAt,
 		token,

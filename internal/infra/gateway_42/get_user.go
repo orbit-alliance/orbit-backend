@@ -2,38 +2,36 @@ package gateway_42
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
 )
 
-func getUserByID(user42ID, token string) (userResponse, error) {
-	var data userResponse
-	url := fmt.Sprintf("https://api.intra.42.fr/v2/users/%s", user42ID)
+func (g *Gateway42) getUserByID(
+	ctx context.Context,
+	user42ID string,
+	token string, // access‑token (user ou app com scope public)
+) (userResponse, error) {
 
-	req, err := http.NewRequest("GET", url, nil)
+	// valor zero p/ retorno em caso de erro
+	var zero userResponse
+
+	path := fmt.Sprintf("/v2/users/%s", user42ID)
+
+	resp, err := doJSON[userResponse](
+		ctx,
+		g.client, // *Client com timeout & retry
+		http.MethodGet,
+		path,
+		"Bearer "+token, // cabeçalho Authorization completo
+		nil,             // GET sem body
+		ok2xx,
+	)
 	if err != nil {
-		return data, err
+		return zero, err
 	}
-	req.Header.Set("Authorization", "Bearer "+token)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return data, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return data, fmt.Errorf("error fetching token: %s", resp.Status)
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-		return data, fmt.Errorf("error decoding JSON response: %w", err)
-	}
-	return data, nil
+	return resp, nil
 }
 
 func (g *Gateway42) GetBasicUserInfo(
