@@ -94,12 +94,13 @@ func (g *EthGateway) worker() {
 
 // Envio da transação + espera do mining
 func (g *EthGateway) sendTx(ctx context.Context, a *user.UserGoodAction) error {
+
 	auth, err := bind.NewKeyedTransactorWithChainID(g.pk, g.chainID)
 	if err != nil {
 		return fmt.Errorf("failed to create transactor: %w", err)
 	}
 	auth.Context = ctx
-	auth.GasLimit = 300_000 // ou deixe zero para estimar automaticamente
+	auth.GasLimit = 0
 
 	tx, err := g.contract.PublishAction(
 		auth,

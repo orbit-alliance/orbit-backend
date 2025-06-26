@@ -92,14 +92,13 @@ func main() {
 	)
 
 	// Publicador de ações de boas práticas na blockchain
-	onChainPublisher := services.NewOnChainPublisher(ethGateway)
+	onChainPublisher := services.NewOnChainGoodActionPublisher(ethGateway)
 	eventBus.Subscribe(user.DidGoodAction{}.EventType(), onChainPublisher.GoodActionPublisher)
 	// Inscreve o serviço de bônus de projetos para receber eventos de registro de usuários
 	eventBus.Subscribe(user.User42Registered{}.EventType(), userBonusProjectService.ApplyRetroactiveBonusProject)
 	// Inscreve o serviço de recompensas de frequência para receber eventos de registro de usuários
 	eventBus.Subscribe(user.User42Registered{}.EventType(), userFrequencyRewardService.ApplyRetroactiveFrequencyReward)
 
-	// Inicia o serviço de bônus de projetos para aplicar bônus retroativos
 	dailyJobs(userBonusProjectService.DailyBonusProjectJob, userFrequencyRewardService.DailyFrequencyRewardJob)
 
 	// Handlers para as rotas de autenticação da 42

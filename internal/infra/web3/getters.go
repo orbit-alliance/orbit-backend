@@ -2,6 +2,7 @@ package web3
 
 import (
 	"context"
+	"log"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -17,6 +18,7 @@ func (e *EthGateway) GetCoinsStatusByWallet(ctx context.Context, wallet string) 
 
 	breakdown, err := e.contract.GetBalanceBreakdown(callOpts, address)
 	if err != nil {
+		log.Printf("Failed to get balance breakdown for wallet %s: %v", wallet, err)
 		return nil, err
 	}
 
