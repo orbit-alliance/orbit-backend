@@ -20,7 +20,7 @@ type Config struct {
 	ALLOWED_ORIGINS    string `env:"CORS_ORIGINS" envDefault:"*"`
 }
 
-func Load() Config {
+func load() Config {
 	if err := godotenv.Load(); err != nil {
 		log.Print(".env not found")
 	}
