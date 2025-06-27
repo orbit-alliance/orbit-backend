@@ -18,7 +18,6 @@ type UserGoodAction struct {
 }
 
 func NewUserGoodAction(
-	id primitive.ObjectID,
 	userID primitive.ObjectID,
 	userWallet string,
 	username string,
@@ -28,7 +27,7 @@ func NewUserGoodAction(
 	performedAt time.Time,
 ) *UserGoodAction {
 	return &UserGoodAction{
-		ID:           id,
+		ID:           primitive.NewObjectID(),
 		UserID:       userID,
 		UserWallet:   userWallet,
 		Username:     username,
