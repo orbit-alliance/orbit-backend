@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
 )
 
@@ -47,6 +48,7 @@ func (p *EventAttendanceProcessor) Process(ctx context.Context, input EventAtten
 		}
 
 		userGoodAction := user.NewUserGoodAction(
+			shared.NewMongoID(),
 			u.ID,
 			u.Wallet,
 			u.Username,
@@ -60,7 +62,7 @@ func (p *EventAttendanceProcessor) Process(ctx context.Context, input EventAtten
 	}
 
 	if len(processingErrors) > 0 {
-		return userActions, fmt.Errorf("Some errors occurred while processing event attendance: %v", processingErrors)
+		return userActions, fmt.Errorf("some errors occurred while processing event attendance: %v", processingErrors)
 	}
 
 	return userActions, nil
