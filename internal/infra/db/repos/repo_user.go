@@ -60,6 +60,20 @@ func (r *UserRepository) EarnTokens(ctx context.Context, id primitive.ObjectID, 
 	return nil
 }
 
+func (r *UserRepository) IncrementRewardedDays(ctx context.Context, id primitive.ObjectID, increment int) error {
+	filter := bson.M{"_id": id}
+	update := bson.M{
+		"$inc": bson.M{"rewarded_days": increment},
+	}
+
+	_, err := r.collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *UserRepository) SaveLogin(ctx context.Context, id primitive.ObjectID, lastLoginIn42 string, currentStreak int) error {
 
 	filter := bson.M{"_id": id}

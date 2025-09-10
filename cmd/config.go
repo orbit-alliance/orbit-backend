@@ -17,6 +17,7 @@ type Config struct {
 	ETH_RPC_URL        string `env:"ETH_RPC"`
 	ETH_PRIVATE_KEY    string `env:"ETH_PRIVATE_KEY"`
 	CONTRACT_ADDRESS   string `env:"CONTRACT_ADDRESS"`
+	FIRE_START_DATE    string `env:"FIRE_START_DATE" envDefault:"2025-06-10T00:00:00Z"`
 	ALLOWED_ORIGINS    string `env:"CORS_ORIGINS" envDefault:"*"`
 }
 

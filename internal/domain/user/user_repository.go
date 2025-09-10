@@ -11,6 +11,7 @@ type UserRepository interface {
 	Save(ctx context.Context, user *User) error
 	SaveLogin(ctx context.Context, id primitive.ObjectID, lastLoginIn42 string, currentStreak int) error
 	EarnTokens(ctx context.Context, id primitive.ObjectID, amount uint64) error
+	IncrementRewardedDays(ctx context.Context, id primitive.ObjectID, increment int) error
 	FindByID(ctx context.Context, id string) (*User, error)
 	FindByID42(ctx context.Context, id42 string) (*User, error)
 	FindByWallet(ctx context.Context, wallet string) (*User, error)

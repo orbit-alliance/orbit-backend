@@ -1,6 +1,7 @@
 package user
 
 import (
+	"os"
 	"time"
 
 	"github.com/orbit-alliance/orbit-backend/internal/domain/coin"
@@ -64,13 +65,25 @@ func (u *User) DoBonusProject(newProject, oldProject *UserProject, goodAction co
 	return u.retryProject(newProject, oldProject, goodAction)
 }
 
-func (u *User) DoFrequencyReward(newLastLogin string, newStreak int, goodAction coin.GoodAction) (*DidGoodAction, *UserGoodAction, error) {
+func (u *User) DoFrequencyReward(newLastLogin string, newStreak int, goodAction coin.GoodAction) (*DidGoodAction, *UserGoodAction, bool, error) {
+	// Verificar se a data atual é posterior à FIRE_START_DATE
+	fireStartDateStr := os.Getenv("FIRE_START_DATE")
+	if fireStartDateStr == "" {
+		fireStartDateStr = "2025-06-10T00:00:00Z" // valor padrão
+	}
+
+	shouldIncrementRewardedDays := false
+	fireStartDate, err := time.Parse(time.RFC3339, fireStartDateStr)
+	if err == nil && time.Now().After(fireStartDate) {
+		shouldIncrementRewardedDays = true
+	}
+
 	u.LastLoginIn42 = newLastLogin
 	u.CurrentStreak = newStreak
 	userGoodAction := NewUserGoodAction(shared.NewMongoID(), u.ID, u.Wallet, u.Username, goodAction.ID, goodAction.Name, int64(goodAction.RewardAmount), time.Now())
 	didGoodAction, err := u.doGoodAction(userGoodAction)
 
-	return didGoodAction, userGoodAction, err
+	return didGoodAction, userGoodAction, shouldIncrementRewardedDays, err
 }
 
 func (u *User) retryProject(newProject, olderProject *UserProject, goodAction coin.GoodAction) (*DidGoodAction, *UserGoodAction, error) {

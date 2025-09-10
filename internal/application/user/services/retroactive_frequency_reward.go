@@ -87,13 +87,14 @@ func getRetroactiveReward(user user.User, logList []user.UserLoggedDaysDTO, rewa
 			currentStreak = 1
 		}
 
-		if currentStreak == 26 {
+		switch currentStreak {
+		case 26:
 			goodAction, err := getReward(SEQUENCE_26_REWARD, rewardList)
 			if err != nil {
 				return "", 0, nil, err
 			}
 			groupGoodActions = append(groupGoodActions, goodAction)
-		} else if currentStreak == 42 {
+		case 42:
 			goodAction, err := getReward(SEQUENCE_42_REWARD, rewardList)
 			if err != nil {
 				return "", 0, nil, err
@@ -138,14 +139,18 @@ func (s *RetroactiveFrequencyRewardService) retroactiveFrequencyRewardHandler(ct
 	}
 
 	totalTokens := uint64(0)
+	totalRewardedDaysIncrement := 0
 	for _, action := range groupGoodActions {
-		evt, userGoodAction, err := usr.DoFrequencyReward(newLastLogin, newStreak, action)
+		evt, userGoodAction, shouldIncrementRewardedDays, err := usr.DoFrequencyReward(newLastLogin, newStreak, action)
 		if err != nil {
 			return err
 		}
 		if evt != nil {
 			s.eventBus.Publish(evt)
 			totalTokens += action.RewardAmount
+			if shouldIncrementRewardedDays {
+				totalRewardedDaysIncrement++
+			}
 			if err := s.userGoodActionRepo.Save(ctx, userGoodAction); err != nil {
 				return err
 			}
@@ -155,6 +160,13 @@ func (s *RetroactiveFrequencyRewardService) retroactiveFrequencyRewardHandler(ct
 	if totalTokens > 0 {
 		if err := s.userRepo.EarnTokens(ctx, usr.ID, totalTokens); err != nil {
 			fmt.Printf("Error adding tokens for user %s: %v\n", usr.ID.Hex(), err)
+			return err
+		}
+	}
+
+	if totalRewardedDaysIncrement > 0 {
+		if err := s.userRepo.IncrementRewardedDays(ctx, usr.ID, totalRewardedDaysIncrement); err != nil {
+			fmt.Printf("Error incrementing rewarded days for user %s: %v\n", usr.ID.Hex(), err)
 			return err
 		}
 	}
