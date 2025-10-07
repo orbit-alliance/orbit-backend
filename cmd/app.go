@@ -19,7 +19,9 @@ import (
 	"github.com/orbit-alliance/orbit-backend/internal/infra/gateway_42"
 	"github.com/orbit-alliance/orbit-backend/internal/infra/web3"
 	user_controller "github.com/orbit-alliance/orbit-backend/internal/interface/http/controllers/user"
+	store_controller "github.com/orbit-alliance/orbit-backend/internal/interface/http/controllers/store"
 	"github.com/robfig/cron/v3"
+	storeServices "github.com/orbit-alliance/orbit-backend/internal/application/store/services"
 )
 
 type App struct {
@@ -51,6 +53,7 @@ func NewApp(cfg Config) (*App, func()) {
 	goodActionRepo := repo.NewGoodActionRepository(db.Database)
 	userProjectRepo := repo.NewUserProjectRepository(db.Database)
 	userGoodActionRepo := repo.NewUserGoodActionRepository(db.Database)
+	storeRepo := repo.NewStoreRepository(db.Database)
 	// …
 
 	// ---------- Seeds ----------
@@ -76,10 +79,13 @@ func NewApp(cfg Config) (*App, func()) {
 		eventBus,
 	)
 	goodActionPublisher := services.NewOnChainGoodActionPublisher(ethGateway)
+	registerStoreService := storeServices.NewRegisterStoreService(storeRepo, eventBus, ethGateway)
+
 	// …
 
 	// ---------- Controladores ----------
 	userController := user_controller.NewUserHandler(register42Service)
+	storeController := store_controller.NewStoreHandler(registerStoreService)
 	// …
 
 	// ---------- Register Domain Events ----------
@@ -103,7 +109,7 @@ func NewApp(cfg Config) (*App, func()) {
 	}
 
 	// ---------- HTTP ----------
-	router := buildHTTP(cfg, userController /* , outros handlers ... */)
+	router := buildHTTP(cfg, userController, storeController /* , outros handlers ... */)
 
 	app := &App{router: router, jobs: jobs, c: c}
 
