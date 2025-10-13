@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	storeServices "github.com/orbit-alliance/orbit-backend/internal/application/store/services"
 	"github.com/orbit-alliance/orbit-backend/internal/application/user/services"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
@@ -18,10 +19,9 @@ import (
 	seed "github.com/orbit-alliance/orbit-backend/internal/infra/db/seeds"
 	"github.com/orbit-alliance/orbit-backend/internal/infra/gateway_42"
 	"github.com/orbit-alliance/orbit-backend/internal/infra/web3"
-	user_controller "github.com/orbit-alliance/orbit-backend/internal/interface/http/controllers/user"
 	store_controller "github.com/orbit-alliance/orbit-backend/internal/interface/http/controllers/store"
+	user_controller "github.com/orbit-alliance/orbit-backend/internal/interface/http/controllers/user"
 	"github.com/robfig/cron/v3"
-	storeServices "github.com/orbit-alliance/orbit-backend/internal/application/store/services"
 )
 
 type App struct {
@@ -79,7 +79,7 @@ func NewApp(cfg Config) (*App, func()) {
 		eventBus,
 	)
 	goodActionPublisher := services.NewOnChainGoodActionPublisher(ethGateway)
-	registerStoreService := storeServices.NewRegisterStoreService(storeRepo, eventBus, ethGateway)
+	registerStoreService := storeServices.NewRegisterStoreService(storeRepo, userRepo, eventBus, ethGateway)
 
 	// …
 

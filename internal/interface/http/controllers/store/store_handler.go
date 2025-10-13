@@ -12,20 +12,21 @@ type StoreHandler struct {
 	registerService *services.RegisterStoreService
 }
 
-//Shared
+// Shared
 func NewStoreHandler(registerService *services.RegisterStoreService) *StoreHandler {
 	return &StoreHandler{
 		registerService: registerService,
 	}
 }
 
-//Shared
+// Shared
 type RequestPayload struct {
 	WalletAddress string `json:"wallet_address"`
+	UserId        string `json:"user_id"`
 }
 
-func (h *StoreHandler) RegisterStore (w http.ResponseWriter, r *http.Request) {
-	
+func (h *StoreHandler) RegisterStore(w http.ResponseWriter, r *http.Request) {
+
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
 		http.Error(w, "Authorization header missing", http.StatusUnauthorized)
@@ -45,9 +46,14 @@ func (h *StoreHandler) RegisterStore (w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	storeInfo, err := h.registerService.RegisterStore(r.Context(), payload.WalletAddress)
+	// code42 := parts[1]
+
+	storeInfo, err := h.registerService.RegisterStore(r.Context(), payload.UserId, payload.WalletAddress)
+
+	// fmt.Println(storeInfo)
+
 	if err != nil {
-		http.Error(w, "Erro ao registrar loja: " + err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Erro ao registrar loja: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
