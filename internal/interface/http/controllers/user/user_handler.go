@@ -28,21 +28,11 @@ func NewUserHandler(
 
 type RequestPayload struct {
 	WalletAddress string `json:"wallet_address"`
+	IntraToken    string `json:"intra_token"`
 }
 
 func (h *UserHandler) Register42User(w http.ResponseWriter, r *http.Request) {
 
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" {
-		http.Error(w, "Authorization header missing", http.StatusUnauthorized)
-		return
-	}
-
-	parts := strings.Split(authHeader, " ")
-	if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
-		http.Error(w, "Authorization header format must be Bearer {token}", http.StatusUnauthorized)
-		return
-	}
 
 	var payload RequestPayload
 	err := json.NewDecoder(r.Body).Decode(&payload)
@@ -51,7 +41,7 @@ func (h *UserHandler) Register42User(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	code42 := parts[1]
+	code42 := payload.IntraToken
 
 	basicInfo, err := h.registerService.Register42User(r.Context(), code42, payload.WalletAddress)
 	if err != nil {
