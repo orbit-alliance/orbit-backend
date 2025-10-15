@@ -17,6 +17,24 @@ type Benefit struct {
 	MaxPeruser		uint64				`json:"max_per_user" bson:"max_per_user"`
 	AllowedNFTTypes	[]nft.NFT			`json:"allowed_nft_types" bson:"allowed_nft_types"`
 	BlockedNFTTypes	[]nft.NFT			`json:"blocked_nft_types" bson:"blocked_nft_types"`
+	ImageURL		string				`json:"image_url" bson:"image_url"`
+    Category		string				`json:"category" bson:"category"`
+    Tags			[]string			`json:"tags" bson:"tags"`
+    IsActive		bool				`json:"is_active" bson:"is_active"`
+    CreatedBy		string				`json:"created_by" bson:"created_by"`
 	CreatedAt		time.Time			`json:"created_at" bson:"created_at"`
 	LastUpdated		time.Time			`json:"last_updated" bson:"last_updated"`
+}
+
+func NewBenefit (id primitive.ObjectID, name, description, imageUrl, category, createdBy string, totalAvailable, maxPeruser uint64) *Benefit {
+	return &Benefit{
+		ID:				id,
+		Name:			name,
+		Description:	description,
+		ImageURL:		imageUrl,
+		Category:		category,
+		CreatedBy:		createdBy,
+		TotalAvailable: totalAvailable,
+		MaxPeruser:		maxPeruser,
+	}
 }

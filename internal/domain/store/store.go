@@ -16,18 +16,10 @@ const (
 	SUSPENDED
 )
 
-// This benefit is just to start store implementation. It will be a domain
-type Benefit struct {
-	ID          primitive.ObjectID `json:"id" bson:"_id"`
-	Name        string             `json:"name" bson:"name"`
-	Description string             `json:"description" bson:"description"`
-}
-
-// Store will be a singleton in DB. It will have an id
 type Store struct {
 	ID              primitive.ObjectID `json:"id" bson:"_id"`
 	AdmUser         user.User          `json:"adm_user" bson:"adm_user"`
-	Benefits        []Benefit          `json:"benefits" bson:"benefits"`
+	// Benefits        []Benefit          `json:"benefits" bson:"benefits"`
 	BenefitQuantity uint64             `json:"benefit_quantity" bson:"benefit_quantity"`
 	Wallet          string             `json:"wallet" bson:"wallet"`
 	CoinStatus      coin.CoinStatus    `json:"total_coin_amount" bson:"total_coin_amount"`
@@ -37,7 +29,6 @@ type Store struct {
 	Status          StoreStatus        `json:"store_status" bson:"store_status"`
 }
 
-// The idea is that this function would be called once.
 func NewStore(id primitive.ObjectID, admUser user.User, wallet string, coinStatus coin.CoinStatus) *Store {
 	return &Store{
 		ID:          id,

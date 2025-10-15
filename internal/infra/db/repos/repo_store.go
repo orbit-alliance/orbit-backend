@@ -66,25 +66,25 @@ func (r *StoreRepository) FindByID(ctx context.Context, id string) (*store.Store
 	return &store, nil
 }
 
-func (r *StoreRepository) LoadAll(ctx context.Context) ([]*store.Store, error) {
-	cursor, err := r.collection.Find(ctx, bson.M{})
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
+// func (r *StoreRepository) LoadAll(ctx context.Context) ([]*store.Store, error) {
+// 	cursor, err := r.collection.Find(ctx, bson.M{})
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer cursor.Close(ctx)
 
-	var stores []*store.Store
-	for cursor.Next(ctx) {
-		var store store.Store
-		if err := cursor.Decode(&store); err != nil {
-			return nil, err
-		}
-		stores = append(stores, &store)
-	}
+// 	var stores []*store.Store
+// 	for cursor.Next(ctx) {
+// 		var store store.Store
+// 		if err := cursor.Decode(&store); err != nil {
+// 			return nil, err
+// 		}
+// 		stores = append(stores, &store)
+// 	}
 
-	if err := cursor.Err(); err != nil {
-		return nil, err
-	}
+// 	if err := cursor.Err(); err != nil {
+// 		return nil, err
+// 	}
 
-	return stores, nil
-}
+// 	return stores, nil
+// }

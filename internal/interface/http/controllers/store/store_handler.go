@@ -46,12 +46,7 @@ func (h *StoreHandler) RegisterStore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// code42 := parts[1]
-
 	storeInfo, err := h.registerService.RegisterStore(r.Context(), payload.UserId, payload.WalletAddress)
-
-	// fmt.Println(storeInfo)
-
 	if err != nil {
 		http.Error(w, "Erro ao registrar loja: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -59,6 +54,4 @@ func (h *StoreHandler) RegisterStore(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(storeInfo)
-
-	//Stopped here
 }
