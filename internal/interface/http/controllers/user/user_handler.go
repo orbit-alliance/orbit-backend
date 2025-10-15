@@ -2,8 +2,8 @@ package user_controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/orbit-alliance/orbit-backend/internal/application/user/services"
 )
