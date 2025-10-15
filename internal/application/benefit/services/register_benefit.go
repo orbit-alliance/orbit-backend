@@ -37,24 +37,29 @@ func (s *RegisterBenefitService) RegisterBenefit(ctx context.Context, storeId, n
 		fmt.Println("Store to register benefit not found:", err)
 		return nil, err
 	}
-
-		
 	totalAvailableInt, err := strconv.ParseUint(totalAvailable, 10, 64)
 	if err != nil {
-		fmt.Printf("Invalid total available number:", err);
+		fmt.Println("Invalid total available number:", err);
 		return nil, err
 	}
 	maxPerUserInt, err := strconv.ParseUint(maxPeruser, 10, 64) 
 	if err != nil {
-		fmt.Printf("Invalid max per user number:", err);
+		fmt.Println("Invalid max per user number:", err);
 		return nil, err
 	}
-
 	newBenefit := benefit.NewBenefit(primitive.NewObjectID(), 
 		name, description, imageUrl, category, store.AdmUser.Username,
 		totalAvailableInt, maxPerUserInt)
-
-	//STOPPED HERE
-
-
+	err = s.benefitRepo.Save(ctx, newBenefit)
+	if (err != nil) {
+		fmt.Println("Error saving benefit: ", err)
+		return nil, err
+	}
+	benefitDto := benefit.NewBenefitInfoDTO(newBenefit.ID.Hex(), newBenefit.Name, 
+		newBenefit.Description, newBenefit.ImageURL, newBenefit.Category,
+		newBenefit.CreatedBy, newBenefit.CreatedAt.String(), newBenefit.LastUpdated.String(), 
+		int64(newBenefit.EarnedCost), int64(newBenefit.TransferedCost), int64(newBenefit.TotalAvailable), int64(newBenefit.MaxPeruser),
+		newBenefit.IsActive, newBenefit.Tags)
+	s.eventBus.Publish(benefit.NewBenefitRegistered(newBenefit))
+	return benefitDto, nil 
 }

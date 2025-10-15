@@ -45,7 +45,6 @@ func (s *RegisterStoreService) RegisterStore(ctx context.Context, userId, wallet
 		return nil, err
 	}
 	newStore := store.NewStore(primitive.NewObjectID(), *user, walletAddress, *coinStatus)
-	s.storeRepo.Save(ctx, newStore)
 	err = s.storeRepo.Save(ctx, newStore)
 	if err != nil {
 		fmt.Println("Error saving new store", err)
