@@ -19,7 +19,6 @@ func NewStoreHandler(registerService *services.RegisterStoreService) *StoreHandl
 	}
 }
 
-// Shared
 type RequestPayload struct {
 	WalletAddress string `json:"wallet_address"`
 	UserId        string `json:"user_id"`

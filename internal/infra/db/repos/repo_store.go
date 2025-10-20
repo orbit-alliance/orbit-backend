@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"sync"
+	"time"
 
 	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/store"
@@ -38,6 +39,35 @@ func (r *StoreRepository) Save(ctx context.Context, store *store.Store) error {
 	opts := options.Update().SetUpsert(true)
 
 	_, err := r.collection.UpdateOne(ctx, filter, update, opts)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *StoreRepository) UpdateBenefit(ctx context.Context, store *store.Store, index int) error {
+
+	filter := bson.M{
+		"_id": store.ID,
+		"benefits._id": store.Benefits[index].ID,
+	}
+
+	update := bson.M{
+		"$set": bson.M{
+			"benefits.$.name":				store.Benefits[index].Name,
+			"benefits.$.description":		store.Benefits[index].Description,
+			"benefits.$.image_url":			store.Benefits[index].ImageURL,
+			"benefits.$.category":			store.Benefits[index].Category,
+			"benefits.$.total_available":	store.Benefits[index].TotalAvailable,
+			"benefits.$.max_per_user":		store.Benefits[index].MaxPerUser,
+			"benefits.$.is_active":			store.Benefits[index].IsActive,
+			"benefits.$.last_updated":		time.Now(),
+		},
+	}
+	// opts := options.Update().SetUpsert(true)
+
+	_, err := r.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return err
 	}

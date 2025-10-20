@@ -4,8 +4,8 @@ import (
 	"context"
 	"sync"
 
-	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/benefit"
+	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -37,6 +37,23 @@ func (r *BenefitRepository) Save(ctx context.Context, benefit *benefit.Benefit) 
 	opts := options.Update().SetUpsert(true)
 
 	_, err := r.collection.UpdateOne(ctx, filter, update, opts)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *BenefitRepository) Update(ctx context.Context, benefit *benefit.Benefit) error {
+
+	filter := bson.M{"_id": benefit.ID}
+	update := bson.M{
+		"$set": benefit,
+	}
+
+	// opts := options.Update().SetUpsert(true)
+
+	_, err := r.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return err
 	}

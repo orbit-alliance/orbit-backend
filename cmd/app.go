@@ -11,6 +11,7 @@ import (
 	"time"
 
 	storeServices "github.com/orbit-alliance/orbit-backend/internal/application/store/services"
+	benefitServices "github.com/orbit-alliance/orbit-backend/internal/application/benefit/services"
 	"github.com/orbit-alliance/orbit-backend/internal/application/user/services"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
@@ -21,6 +22,7 @@ import (
 	"github.com/orbit-alliance/orbit-backend/internal/infra/web3"
 	store_controller "github.com/orbit-alliance/orbit-backend/internal/interface/http/controllers/store"
 	user_controller "github.com/orbit-alliance/orbit-backend/internal/interface/http/controllers/user"
+	benefit_controller "github.com/orbit-alliance/orbit-backend/internal/interface/http/controllers/benefit"
 	"github.com/robfig/cron/v3"
 )
 
@@ -54,6 +56,7 @@ func NewApp(cfg Config) (*App, func()) {
 	userProjectRepo := repo.NewUserProjectRepository(db.Database)
 	userGoodActionRepo := repo.NewUserGoodActionRepository(db.Database)
 	storeRepo := repo.NewStoreRepository(db.Database)
+	benefitRepo := repo.NewBenefitRepository(db.Database)
 	// …
 
 	// ---------- Seeds ----------
@@ -80,12 +83,14 @@ func NewApp(cfg Config) (*App, func()) {
 	)
 	goodActionPublisher := services.NewOnChainGoodActionPublisher(ethGateway)
 	registerStoreService := storeServices.NewRegisterStoreService(storeRepo, userRepo, eventBus, ethGateway)
+	registerBenefitService := benefitServices.NewRegisterBenefitService(benefitRepo, storeRepo, eventBus)
 
 	// …
 
 	// ---------- Controladores ----------
 	userController := user_controller.NewUserHandler(register42Service)
 	storeController := store_controller.NewStoreHandler(registerStoreService)
+	benefitController := benefit_controller.NewBenefitHandler(registerBenefitService)
 	// …
 
 	// ---------- Register Domain Events ----------
@@ -109,7 +114,7 @@ func NewApp(cfg Config) (*App, func()) {
 	}
 
 	// ---------- HTTP ----------
-	router := buildHTTP(cfg, userController, storeController /* , outros handlers ... */)
+	router := buildHTTP(cfg, userController, storeController, benefitController /* , outros handlers ... */)
 
 	app := &App{router: router, jobs: jobs, c: c}
 
