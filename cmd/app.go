@@ -83,7 +83,7 @@ func NewApp(cfg Config) (*App, func()) {
 	)
 	goodActionPublisher := services.NewOnChainGoodActionPublisher(ethGateway)
 	registerStoreService := storeServices.NewRegisterStoreService(storeRepo, userRepo, eventBus, ethGateway)
-	registerBenefitService := benefitServices.NewRegisterBenefitService(benefitRepo, storeRepo, eventBus)
+	registerBenefitService := benefitServices.NewRegisterBenefitService(benefitRepo, storeRepo, userRepo, eventBus)
 
 	// …
 

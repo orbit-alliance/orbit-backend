@@ -6,6 +6,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type BenefitStatus uint8
+
+const (
+	ACTIVE BenefitStatus = iota
+	INACTIVE
+	DELETED
+)
+
 type Benefit struct {
 	ID				primitive.ObjectID	`json:"id" bson:"_id"`
 	Name			string				`json:"name" bson:"name"`
@@ -17,14 +25,17 @@ type Benefit struct {
 	ImageURL		string				`json:"image_url" bson:"image_url"`
     Category		string				`json:"category" bson:"category"`
     Tags			[]string			`json:"tags" bson:"tags"`
-    IsActive		bool				`json:"is_active" bson:"is_active"`
+    Status			BenefitStatus		`json:"status" bson:"status"`
     CreatedBy		string				`json:"created_by" bson:"created_by"`
 	CreatedAt		time.Time			`json:"created_at" bson:"created_at"`
 	LastUpdated		time.Time			`json:"last_updated" bson:"last_updated"`
+	AvailableStart	time.Time			`json:"available_start" bson:"available_start"`
+	AvailableEnd	time.Time			`json:"available_end" bson:"available_end"`
+	DeletedTime		time.Time			`json:"deleted_time" bson:"deleted_time"` 
 }
 
 func NewBenefit (id primitive.ObjectID, name, description, imageUrl, category, createdBy string, 
-	totalAvailable, maxPeruser uint64, isActive bool) *Benefit {
+	totalAvailable, maxPeruser uint64, status BenefitStatus, tags []string) *Benefit {
 	return &Benefit{
 		ID:				id,
 		Name:			name,
@@ -34,8 +45,12 @@ func NewBenefit (id primitive.ObjectID, name, description, imageUrl, category, c
 		CreatedBy:		createdBy,
 		TotalAvailable: totalAvailable,
 		MaxPerUser:		maxPeruser,
-		IsActive:		isActive,
+		Status:			status,
 		CreatedAt:		time.Now(),
 		LastUpdated:	time.Now(),
+		AvailableStart:	time.Now(),
+		AvailableEnd:	time.Now(),
+		DeletedTime:	time.Time{},
+		Tags:			tags,
 	}
 }

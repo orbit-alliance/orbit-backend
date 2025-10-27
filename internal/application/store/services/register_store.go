@@ -50,7 +50,7 @@ func (s *RegisterStoreService) RegisterStore(ctx context.Context, userId, wallet
 		fmt.Println("Error saving new store", err)
 		return nil, err
 	}
-	storeDto := store.NewStoreInfoDTO(newStore.ID.Hex(), newStore.AdmUser.Username, newStore.CreatedAt.String(), newStore.LastUpdated.String(), int64(newStore.BenefitQuantity))
+	storeDto := store.NewStoreInfoDTO(*newStore)
 	s.eventBus.Publish(store.NewStoreRegistered(newStore))
 	return storeDto, nil
 }

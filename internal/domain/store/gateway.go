@@ -7,20 +7,24 @@ import (
 )
 
 type StoreInfoDTO struct {
-	ID              string `json:"_id"`
-	AdmUsername     string `json:"adm_username"`
-	CreatedAt       string `json:"created_at"`
-	LastUpdated     string `json:"last_updated"`
-	BenefitQuantity int64  `json:"benefit_quantity"`
+	ID              string		`json:"_id"`
+	AdmUsername     string		`json:"adm_username"`
+	CreatedAt       string		`json:"created_at"`
+	LastUpdated     string		`json:"last_updated"`
+	TimeLastSale	string		`json:"time_last_sale"`
+	BenefitQuantity uint64		`json:"benefit_quantity"`
+	Status			StoreStatus `json:"store_status"`
 }
 
-func NewStoreInfoDTO(id, admUsername, createdAt, lastUpdated string, benefitQuatity int64) *StoreInfoDTO {
+func NewStoreInfoDTO(store Store) *StoreInfoDTO {
 	return &StoreInfoDTO{
-		ID:              id,
-		AdmUsername:     admUsername,
-		CreatedAt:       createdAt,
-		LastUpdated:     lastUpdated,
-		BenefitQuantity: benefitQuatity,
+		ID:					store.ID.Hex(),
+		AdmUsername:		store.AdmUser.Username,
+		CreatedAt:			store.CreatedAt.String(),
+		LastUpdated:		store.LastUpdated.String(),
+		TimeLastSale:		store.TimeLastSale.String(),
+		BenefitQuantity:	store.BenefitQuantity,
+		Status:				store.Status,
 	}
 }
 

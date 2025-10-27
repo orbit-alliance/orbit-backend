@@ -2,10 +2,12 @@ package benefit_handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/orbit-alliance/orbit-backend/internal/application/benefit/services"
+	"github.com/orbit-alliance/orbit-backend/internal/domain/benefit"
 )
 
 type BenefitHandler struct {
@@ -20,15 +22,17 @@ func NewBenefitHandler(registerService *services.RegisterBenefitService) *Benefi
 }
 
 type RequestPayload struct {
-	StoreId			string	`json:"store_id"`
-	Name			string	`json:"name"`
-	Description		string	`json:"description"`
-	ImageURL		string	`json:"image_url"`
-	Category		string	`json:"category"`
-	TotalAvailable	string	`json:"total_available"`
-	MaxPerUser		string	`json:"max_per_user"`
-	BenefitId		string	`json:"benefit_id"`
-	IsActive		bool	`json:"is_active"`
+	StoreId			string					`json:"store_id"`
+	AdmUserId		string					`json:"adm_user_id"`
+	Name			string					`json:"name"`
+	Description		string					`json:"description"`
+	ImageURL		string					`json:"image_url"`
+	Category		string					`json:"category"`
+	TotalAvailable	string					`json:"total_available"`
+	MaxPerUser		string					`json:"max_per_user"`
+	BenefitId		string					`json:"benefit_id"`
+	Tags			[]string				`json:"tags"`	
+	Status			benefit.BenefitStatus	`json:"is_active"`
 }
 
 func CheckAuthorizarionHeader(w http.ResponseWriter, r *http.Request) bool {
@@ -61,8 +65,8 @@ func (h *BenefitHandler) RegisterBenefit(w http.ResponseWriter, r *http.Request)
 	}
 	
 	benefitInfo, err := h.registerService.RegisterBenefit(
-		r.Context(), payload.StoreId, payload.Name, payload.Description,
-		payload.ImageURL, payload.Category, payload.TotalAvailable, payload.MaxPerUser, payload.IsActive)
+		r.Context(), payload.StoreId, payload.AdmUserId, payload.Name, payload.Description,
+		payload.ImageURL, payload.Category, payload.TotalAvailable, payload.MaxPerUser, payload.Status, payload.Tags)
 	if err != nil {
 		http.Error(w, "Erro ao registrar beneficio: " + err.Error(), http.StatusInternalServerError)
 		return
@@ -86,8 +90,8 @@ func (h *BenefitHandler) UpdateBenefit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	benefitInfo, err := h.registerService.UpdateBenefit(
-		r.Context(), payload.StoreId, payload.BenefitId, payload.Name, payload.Description, 
-		payload.ImageURL, payload.Category, payload.TotalAvailable, payload.MaxPerUser, payload.IsActive)
+		r.Context(), payload.StoreId, payload.AdmUserId, payload.BenefitId, payload.Name, payload.Description, 
+		payload.ImageURL, payload.Category, payload.TotalAvailable, payload.MaxPerUser, payload.Status, payload.Tags)
 	
 	if err != nil {
 		http.Error(w, "Erro ao registrar beneficio: " + err.Error(), http.StatusInternalServerError)
@@ -111,11 +115,11 @@ func (h *BenefitHandler) DeleteBenefit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.registerService.DeleteBenefit(r.Context(), payload.StoreId, payload.BenefitId)
+	benefitDTO, err := h.registerService.DeleteBenefit(r.Context(), payload.StoreId, payload.AdmUserId, payload.BenefitId)
 	if err != nil {
 		http.Error(w, "Erro ao deletar beneficio: " + err.Error(), http.StatusInternalServerError)
 		return
 	}
-
+	fmt.Println("Benefit ", benefitDTO.ID, "deleted")
 	w.WriteHeader(http.StatusNoContent)
 }

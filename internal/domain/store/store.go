@@ -5,7 +5,6 @@ import (
 
 	"github.com/orbit-alliance/orbit-backend/internal/domain/coin"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
-	"github.com/orbit-alliance/orbit-backend/internal/domain/benefit"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -20,7 +19,6 @@ const (
 type Store struct {
 	ID              primitive.ObjectID	`json:"id" bson:"_id"`
 	AdmUser         user.User			`json:"adm_user" bson:"adm_user"`
-	Benefits        []benefit.Benefit	`json:"benefits" bson:"benefits"`
 	BenefitQuantity uint64				`json:"benefit_quantity" bson:"benefit_quantity"`
 	Wallet          string				`json:"wallet" bson:"wallet"`
 	CoinStatus      coin.CoinStatus		`json:"total_coin_amount" bson:"total_coin_amount"`
@@ -32,11 +30,13 @@ type Store struct {
 
 func NewStore(id primitive.ObjectID, admUser user.User, wallet string, coinStatus coin.CoinStatus) *Store {
 	return &Store{
-		ID:          id,
-		AdmUser:     admUser,
-		Wallet:      wallet,
-		CoinStatus:  coinStatus,
-		CreatedAt:   time.Now(),
-		LastUpdated: time.Now(),
+		ID:					id,
+		AdmUser:			admUser,
+		Wallet:				wallet,
+		CoinStatus:			coinStatus,
+		CreatedAt:			time.Now(),
+		LastUpdated:		time.Now(),
+		BenefitQuantity:	0,
+		Status:				ACTIVE,
 	}
 }

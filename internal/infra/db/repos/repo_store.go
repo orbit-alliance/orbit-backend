@@ -3,7 +3,6 @@ package repo
 import (
 	"context"
 	"sync"
-	"time"
 
 	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/store"
@@ -46,6 +45,7 @@ func (r *StoreRepository) Save(ctx context.Context, store *store.Store) error {
 	return nil
 }
 
+/*
 func (r *StoreRepository) UpdateBenefit(ctx context.Context, store *store.Store, index int) error {
 
 	filter := bson.M{
@@ -74,6 +74,7 @@ func (r *StoreRepository) UpdateBenefit(ctx context.Context, store *store.Store,
 
 	return nil
 }
+*/
 
 func (r *StoreRepository) FindByID(ctx context.Context, id string) (*store.Store, error) {
 	idObj, err := shared.ObjectIDFromString(id)
