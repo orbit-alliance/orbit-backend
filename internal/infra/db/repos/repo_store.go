@@ -45,37 +45,6 @@ func (r *StoreRepository) Save(ctx context.Context, store *store.Store) error {
 	return nil
 }
 
-/*
-func (r *StoreRepository) UpdateBenefit(ctx context.Context, store *store.Store, index int) error {
-
-	filter := bson.M{
-		"_id": store.ID,
-		"benefits._id": store.Benefits[index].ID,
-	}
-
-	update := bson.M{
-		"$set": bson.M{
-			"benefits.$.name":				store.Benefits[index].Name,
-			"benefits.$.description":		store.Benefits[index].Description,
-			"benefits.$.image_url":			store.Benefits[index].ImageURL,
-			"benefits.$.category":			store.Benefits[index].Category,
-			"benefits.$.total_available":	store.Benefits[index].TotalAvailable,
-			"benefits.$.max_per_user":		store.Benefits[index].MaxPerUser,
-			"benefits.$.is_active":			store.Benefits[index].IsActive,
-			"benefits.$.last_updated":		time.Now(),
-		},
-	}
-	// opts := options.Update().SetUpsert(true)
-
-	_, err := r.collection.UpdateOne(ctx, filter, update)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-*/
-
 func (r *StoreRepository) FindByID(ctx context.Context, id string) (*store.Store, error) {
 	idObj, err := shared.ObjectIDFromString(id)
 	if err != nil {
@@ -97,25 +66,34 @@ func (r *StoreRepository) FindByID(ctx context.Context, id string) (*store.Store
 	return &store, nil
 }
 
-// func (r *StoreRepository) LoadAll(ctx context.Context) ([]*store.Store, error) {
-// 	cursor, err := r.collection.Find(ctx, bson.M{})
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer cursor.Close(ctx)
+func (r *StoreRepository) LoadAll(ctx context.Context) ([]*store.Store, error) {
+	cursor, err := r.collection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
 
-// 	var stores []*store.Store
-// 	for cursor.Next(ctx) {
-// 		var store store.Store
-// 		if err := cursor.Decode(&store); err != nil {
-// 			return nil, err
-// 		}
-// 		stores = append(stores, &store)
-// 	}
+	var stores []*store.Store
+	for cursor.Next(ctx) {
+		var store store.Store
+		if err := cursor.Decode(&store); err != nil {
+			return nil, err
+		}
+		stores = append(stores, &store)
+	}
 
-// 	if err := cursor.Err(); err != nil {
-// 		return nil, err
-// 	}
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
 
-// 	return stores, nil
-// }
+	return stores, nil
+}
+
+func (r *StoreRepository) GetSingle(ctx context.Context) (*store.Store, error) {
+	var store store.Store
+	err := r.collection.FindOne(ctx, bson.M{}).Decode(&store)
+	if err != nil {
+		return nil, err
+	}
+	return &store, nil
+}

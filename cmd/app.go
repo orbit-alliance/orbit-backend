@@ -57,6 +57,7 @@ func NewApp(cfg Config) (*App, func()) {
 	userGoodActionRepo := repo.NewUserGoodActionRepository(db.Database)
 	storeRepo := repo.NewStoreRepository(db.Database)
 	benefitRepo := repo.NewBenefitRepository(db.Database)
+	userBenefitPurchaseRepo := repo.NewUserBenefitPurchaseRepository(db.Database)
 	// …
 
 	// ---------- Seeds ----------
@@ -66,6 +67,7 @@ func NewApp(cfg Config) (*App, func()) {
 	// ---------- Serviços ----------
 	register42Service := services.NewRegister42Service(userRepo, eventBus, gateway42, ethGateway)
 	transferCoinsService := services.NewTransferCoinsService(userRepo, transferRepo, eventBus)
+	buyBenefitService := services.NewBuyBenefitService(userRepo, benefitRepo, storeRepo, transferRepo, userBenefitPurchaseRepo, eventBus)
 	userBonusProjectService := services.NewBonusProjectService(
 		userRepo,
 		eventBus,
@@ -88,7 +90,7 @@ func NewApp(cfg Config) (*App, func()) {
 	// …
 
 	// ---------- Controladores ----------
-	userController := user_controller.NewUserHandler(register42Service)
+	userController := user_controller.NewUserHandler(register42Service, transferCoinsService, buyBenefitService)
 	storeController := store_controller.NewStoreHandler(registerStoreService)
 	benefitController := benefit_controller.NewBenefitHandler(registerBenefitService)
 	// …

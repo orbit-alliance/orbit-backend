@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/orbit-alliance/orbit-backend/internal/domain/benefit"
@@ -41,7 +40,7 @@ func isValidAdmUser(s *RegisterBenefitService, ctx context.Context, store store.
 		fmt.Println("Store adm user not found:", err)
 		return false
 	}
-	if (&store.AdmUser != user) {
+	if (store.AdmUser.ID != user.ID) {
 		fmt.Println("User is not a Store adm")
 		return false
 	}
@@ -49,7 +48,11 @@ func isValidAdmUser(s *RegisterBenefitService, ctx context.Context, store store.
 }
 
 func (s *RegisterBenefitService) RegisterBenefit(
-	ctx context.Context, storeId, admUserId, name, description, imageUrl, category, totalAvailable, maxPeruser string, status benefit.BenefitStatus, tags []string) (*benefit.BenefitInfoDTO, error) {
+	ctx context.Context, 
+	storeId, admUserId, name, description, imageUrl, category string, 
+	earnedCost, transferedCost, totalAvailable, maxPerUser uint64, 
+	status benefit.BenefitStatus, 
+	tags []string) (*benefit.BenefitInfoDTO, error) {
 	
 	store, err := s.storeRepo.FindByID(ctx, storeId)
 	if err != nil {
@@ -60,19 +63,9 @@ func (s *RegisterBenefitService) RegisterBenefit(
 		return nil, errors.New("Could not validate user")
 	}
 
-	totalAvailableInt, err := strconv.ParseUint(totalAvailable, 10, 64)
-	if err != nil {
-		fmt.Println("Invalid total available number:", err);
-		return nil, err
-	}
-	maxPerUserInt, err := strconv.ParseUint(maxPeruser, 10, 64) 
-	if err != nil {
-		fmt.Println("Invalid max per user number:", err);
-		return nil, err
-	}
 	newBenefit := benefit.NewBenefit(primitive.NewObjectID(), 
 		name, description, imageUrl, category, store.AdmUser.Username,
-		totalAvailableInt, maxPerUserInt, status, tags)
+		earnedCost, transferedCost, totalAvailable, maxPerUser, status, tags)
 	err = s.benefitRepo.Save(ctx, newBenefit)
 	if (err != nil) {
 		fmt.Println("Error trying to save benefit", err)
@@ -85,8 +78,8 @@ func (s *RegisterBenefitService) RegisterBenefit(
 }
 
 func (s *RegisterBenefitService) UpdateBenefit(
-	ctx context.Context, storeId, admUserId, benefitId, name, description, imageUrl, category,
-	totalAvailable, maxPerUser string, status benefit.BenefitStatus, tags []string) (*benefit.BenefitInfoDTO, error) {
+	ctx context.Context, storeId, admUserId, benefitId, name, description, imageUrl, category string, 
+	totalAvailable, maxPerUser uint64, status benefit.BenefitStatus, tags []string) (*benefit.BenefitInfoDTO, error) {
 
 	store, err := s.storeRepo.FindByID(ctx, storeId)
 	if err != nil {
@@ -98,23 +91,12 @@ func (s *RegisterBenefitService) UpdateBenefit(
 	}
 
 	updateBenefit, err := s.benefitRepo.FindByID(ctx, benefitId)
-
-	totalAvailableNum, err := strconv.ParseUint(totalAvailable, 10, 64)
-	if err != nil {
-		fmt.Println("Cannot convert total available:", err)
-		return nil, err
-	}
-	maxPerUserNum, err := strconv.ParseUint(maxPerUser, 10, 64)
-	if err != nil {
-		fmt.Println("Cannot convert max per user:", err)
-		return nil, err
-	}
 	updateBenefit.Name = name
 	updateBenefit.Description = description
 	updateBenefit.ImageURL = imageUrl
 	updateBenefit.Category = category
-	updateBenefit.TotalAvailable = totalAvailableNum
-	updateBenefit.MaxPerUser = maxPerUserNum
+	updateBenefit.TotalAvailable = totalAvailable
+	updateBenefit.MaxPerUser = maxPerUser
 	updateBenefit.LastUpdated = time.Now()
 	updateBenefit.Status = status
 	updateBenefit.Tags = tags

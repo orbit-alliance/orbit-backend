@@ -7,7 +7,7 @@ type BenefitInfoDTO struct {
 	Name			string				`json:"name"`
 	Description		string				`json:"description"` 
 	EarnedCost		uint64				`json:"earned_cost"`
-	TransferedCost	uint64				`json:"transfered_cost"`
+	TransferredCost	uint64				`json:"transferred_cost"`
 	TotalAvailable	uint64				`json:"total_available"`
 	MaxPerUser		uint64				`json:"max_per_user"`
 	ImageURL		string				`json:"image_url"`
@@ -23,21 +23,21 @@ type BenefitInfoDTO struct {
 
 func NewBenefitInfoDTO(benefit Benefit) *BenefitInfoDTO {
 	return &BenefitInfoDTO{
-		ID:				benefit.ID.Hex(),
-		Name:			benefit.Name,
-		Description:	benefit.Description, 
-		EarnedCost:		benefit.EarnedCost,
-		TransferedCost:	benefit.TransferedCost,
-		TotalAvailable:	benefit.TotalAvailable,
-		MaxPerUser:		benefit.MaxPerUser,
-		ImageURL:		benefit.ImageURL,
-		Category:		benefit.Category,
-		Tags:			benefit.Tags,
-		Status:			benefit.Status,
-		CreatedBy:		benefit.CreatedBy,
-		CreatedAt:      benefit.CreatedAt,
-		LastUpdated:	benefit.LastUpdated,
-		AvailableStart:	benefit.AvailableStart,
-		AvailableEnd:	benefit.AvailableEnd,
+		ID:					benefit.ID.Hex(),
+		Name:				benefit.Name,
+		Description:		benefit.Description, 
+		EarnedCost:			benefit.EarnedCost,
+		TransferredCost:	benefit.TransferredCost,
+		TotalAvailable:		benefit.TotalAvailable,
+		MaxPerUser:			benefit.MaxPerUser,
+		ImageURL:			benefit.ImageURL,
+		Category:			benefit.Category,
+		Tags:				benefit.Tags,
+		Status:				benefit.Status,
+		CreatedBy:			benefit.CreatedBy,
+		CreatedAt:			benefit.CreatedAt,
+		LastUpdated:		benefit.LastUpdated,
+		AvailableStart:		benefit.AvailableStart,
+		AvailableEnd:		benefit.AvailableEnd,
 	}
 }

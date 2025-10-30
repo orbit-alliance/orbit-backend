@@ -35,3 +35,7 @@ type UserProjectRepository interface {
 type GoodActionRepository interface {
 	LoadByName(ctx context.Context, name string) (*coin.GoodAction, error)
 }
+
+type UserBenefitPurchaseRepository interface {
+	Save(ctx context.Context, purchase *UserBenefitPurchase) error
+}
