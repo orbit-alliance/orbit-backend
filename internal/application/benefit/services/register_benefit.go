@@ -6,24 +6,24 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/orbit-alliance/orbit-backend/internal/domain/benefit"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
-	"github.com/orbit-alliance/orbit-backend/internal/domain/store"
-	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
+	Benefit "github.com/orbit-alliance/orbit-backend/internal/domain/benefit"
+	Store "github.com/orbit-alliance/orbit-backend/internal/domain/store"
+	User "github.com/orbit-alliance/orbit-backend/internal/domain/user"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type RegisterBenefitService struct {
-	benefitRepo  benefit.BenefitRepository
-	storeRepo  store.StoreRepository
-	userRepo	user.UserRepository
+	benefitRepo  Benefit.BenefitRepository
+	storeRepo  Store.StoreRepository
+	userRepo	User.UserRepository
 	eventBus   *shared.EventBus
 }
 
 func NewRegisterBenefitService(
-	benefitRepo	benefit.BenefitRepository,
-	storeRepo	store.StoreRepository,
-	userRepo	user.UserRepository,
+	benefitRepo	Benefit.BenefitRepository,
+	storeRepo	Store.StoreRepository,
+	userRepo	User.UserRepository,
 	eventBus	*shared.EventBus,
 ) *RegisterBenefitService {
 	return &RegisterBenefitService{
@@ -34,14 +34,14 @@ func NewRegisterBenefitService(
 	}
 }
 
-func isValidAdmUser(s *RegisterBenefitService, ctx context.Context, store store.Store, admUserId string) bool {
+func isValidAdmUser(s *RegisterBenefitService, ctx context.Context, store Store.Store, admUserId string) bool {
 	user, err := s.userRepo.FindByID(ctx, admUserId)
 	if err != nil {
 		fmt.Println("Store adm user not found:", err)
 		return false
 	}
 	if (store.AdmUser.ID != user.ID) {
-		fmt.Println("User is not a Store adm")
+		fmt.Println("User is not a Store administrator:")
 		return false
 	}
 	return true
@@ -51,8 +51,8 @@ func (s *RegisterBenefitService) RegisterBenefit(
 	ctx context.Context, 
 	storeId, admUserId, name, description, imageUrl, category string, 
 	earnedCost, transferedCost, totalAvailable, maxPerUser uint64, 
-	status benefit.BenefitStatus, 
-	tags []string) (*benefit.BenefitInfoDTO, error) {
+	status Benefit.BenefitStatus, 
+	tags []string) (*Benefit.BenefitInfoDTO, error) {
 	
 	store, err := s.storeRepo.FindByID(ctx, storeId)
 	if err != nil {
@@ -60,26 +60,32 @@ func (s *RegisterBenefitService) RegisterBenefit(
 		return nil, err
 	}
 	if (!isValidAdmUser(s, ctx, *store, admUserId)) {
-		return nil, errors.New("Could not validate user")
+		return nil, errors.New("Could not validate user:")
 	}
 
-	newBenefit := benefit.NewBenefit(primitive.NewObjectID(), 
+	newBenefit := Benefit.NewBenefit(primitive.NewObjectID(), 
 		name, description, imageUrl, category, store.AdmUser.Username,
 		earnedCost, transferedCost, totalAvailable, maxPerUser, status, tags)
 	err = s.benefitRepo.Save(ctx, newBenefit)
 	if (err != nil) {
-		fmt.Println("Error trying to save benefit", err)
+		fmt.Println("Error trying to save benefit:", err)
+		return nil, err
+	}
+	store.BenefitQuantity += newBenefit.TotalAvailable
+	err = s.storeRepo.Save(ctx, store)
+	if (err != nil) {
+		fmt.Println("Error trying to update store benefit quantity:", err)
 		return nil, err
 	}
 
-	benefitDto := benefit.NewBenefitInfoDTO(*newBenefit)
-	s.eventBus.Publish(benefit.NewBenefitRegistered(newBenefit))
+	benefitDto := Benefit.NewBenefitInfoDTO(*newBenefit)
+	s.eventBus.Publish(Benefit.NewBenefitRegistered(newBenefit))
 	return benefitDto, nil 
 }
 
 func (s *RegisterBenefitService) UpdateBenefit(
 	ctx context.Context, storeId, admUserId, benefitId, name, description, imageUrl, category string, 
-	totalAvailable, maxPerUser uint64, status benefit.BenefitStatus, tags []string) (*benefit.BenefitInfoDTO, error) {
+	totalAvailable, maxPerUser uint64, status Benefit.BenefitStatus, tags []string) (*Benefit.BenefitInfoDTO, error) {
 
 	store, err := s.storeRepo.FindByID(ctx, storeId)
 	if err != nil {
@@ -90,28 +96,38 @@ func (s *RegisterBenefitService) UpdateBenefit(
 		return nil, errors.New("Could not validate user")
 	}
 
-	updateBenefit, err := s.benefitRepo.FindByID(ctx, benefitId)
-	updateBenefit.Name = name
-	updateBenefit.Description = description
-	updateBenefit.ImageURL = imageUrl
-	updateBenefit.Category = category
-	updateBenefit.TotalAvailable = totalAvailable
-	updateBenefit.MaxPerUser = maxPerUser
-	updateBenefit.LastUpdated = time.Now()
-	updateBenefit.Status = status
-	updateBenefit.Tags = tags
+	benefit, err := s.benefitRepo.FindByID(ctx, benefitId)
+	benefit.Name = name
+	benefit.Description = description
+	benefit.ImageURL = imageUrl
+	benefit.Category = category
+	benefit.MaxPerUser = maxPerUser
+	benefit.LastUpdated = time.Now()
+	benefit.Status = status
+	benefit.Tags = tags
+	store.BenefitQuantity -= benefit.TotalAvailable
+	benefit.TotalAvailable = totalAvailable
+	store.BenefitQuantity += benefit.TotalAvailable
 
-	err = s.benefitRepo.Update(ctx, updateBenefit)
+	// TODO check if use Save or Update
+	err = s.benefitRepo.Save(ctx, benefit)
 	if err != nil {
-		fmt.Println("Could not update changes:", err)
+		fmt.Println("Could not update Benefit changes:", err)
 		return nil, err
 	}
-	benefitDTO := benefit.NewBenefitInfoDTO(*updateBenefit)
+
+	err = s.storeRepo.Save(ctx, store)
+	if err != nil {
+		fmt.Println("Could not Store changes:", err)
+		return nil, err
+	}
+
+	benefitDTO := Benefit.NewBenefitInfoDTO(*benefit)
 
 	return benefitDTO, nil
 }
 
-func (s *RegisterBenefitService) DeleteBenefit(ctx context.Context, storeId, admUserId, benefitId string) (*benefit.BenefitInfoDTO, error) {
+func (s *RegisterBenefitService) DeleteBenefit(ctx context.Context, storeId, admUserId, benefitId string) (*Benefit.BenefitInfoDTO, error) {
 	
 	store, err := s.storeRepo.FindByID(ctx, storeId)
 	if err != nil {
@@ -122,18 +138,28 @@ func (s *RegisterBenefitService) DeleteBenefit(ctx context.Context, storeId, adm
 		return nil, errors.New("Could not validate user")
 	}
 
-	deleteBenefit, err := s.benefitRepo.FindByID(ctx, benefitId)
+	benefit, err := s.benefitRepo.FindByID(ctx, benefitId)
 	if err != nil {
 		fmt.Println("Could not find benefit")
 		return nil, err
 	}
-	deleteBenefit.Status = benefit.DELETED 
-	err = s.benefitRepo.Update(ctx, deleteBenefit)
+	benefit.Status = Benefit.DELETED
+	store.BenefitQuantity -= benefit.TotalAvailable
+	benefit.TotalAvailable = 0
+	// TODO check if use Save or Update
+	err = s.benefitRepo.Save(ctx, benefit)
 	if err != nil {
-		fmt.Println("Could not update changes:", err)
+		fmt.Println("Could not update benefit changes:", err)
 		return nil, err
 	}
-	benefitDTO := benefit.NewBenefitInfoDTO(*deleteBenefit)
+	
+	err = s.storeRepo.Save(ctx, store)
+	if err != nil {
+		fmt.Println("Could not update store changes:", err)
+		return nil, err
+	}
+
+	benefitDTO := Benefit.NewBenefitInfoDTO(*benefit)
 
 	return benefitDTO, nil
 }

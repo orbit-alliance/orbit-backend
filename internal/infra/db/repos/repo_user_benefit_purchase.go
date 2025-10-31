@@ -14,7 +14,7 @@ type UserBenefitPurchaseRepository struct {
 }
 
 func NewUserBenefitPurchaseRepository(db *mongo.Database) *UserBenefitPurchaseRepository {
-	collection := db.Collection("user_benefit_purchase")
+	collection := db.Collection("user_benefit_purchases")
 	return &UserBenefitPurchaseRepository{collection: collection}
 }
 

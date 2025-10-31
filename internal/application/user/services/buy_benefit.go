@@ -5,27 +5,28 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/orbit-alliance/orbit-backend/internal/domain/benefit"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
-	"github.com/orbit-alliance/orbit-backend/internal/domain/store"
-	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
+	Benefit "github.com/orbit-alliance/orbit-backend/internal/domain/benefit"
+	Store "github.com/orbit-alliance/orbit-backend/internal/domain/store"
+	User "github.com/orbit-alliance/orbit-backend/internal/domain/user"
+	Coin "github.com/orbit-alliance/orbit-backend/internal/domain/coin"
 )
 
 type BuyBenefitService struct {
-	userRepo				user.UserRepository
-	benefitRepo				benefit.BenefitRepository
-	storeRepo				store.StoreRepository
-	transferRepo			user.TransferRepository
-	benefitPurchaseRepo		user.UserBenefitPurchaseRepository
+	userRepo				User.UserRepository
+	benefitRepo				Benefit.BenefitRepository
+	storeRepo				Store.StoreRepository
+	transferRepo			User.TransferRepository
+	benefitPurchaseRepo		User.UserBenefitPurchaseRepository
 	eventBus				*shared.EventBus
 }
 
 func NewBuyBenefitService(
-	userRepo user.UserRepository, 
-	benefitRepo benefit.BenefitRepository,
-	storeRepo store.StoreRepository,
-	transferRepo user.TransferRepository,
-	benefitPurchaseRepo user.UserBenefitPurchaseRepository,
+	userRepo User.UserRepository, 
+	benefitRepo Benefit.BenefitRepository,
+	storeRepo Store.StoreRepository,
+	transferRepo User.TransferRepository,
+	benefitPurchaseRepo User.UserBenefitPurchaseRepository,
 	eventBus *shared.EventBus) *BuyBenefitService {
 	return &BuyBenefitService{
 		userRepo:	userRepo,
@@ -37,7 +38,7 @@ func NewBuyBenefitService(
 	}
 }
 
-func (s *BuyBenefitService) BuyBenefit(userId, benefitId string) (*user.UserBenefitPurchaseDTO, error) {
+func (s *BuyBenefitService) BuyBenefit(userId, benefitId string) (*User.UserBenefitPurchaseDTO, error) {
 	
 	ctx := context.Background()
 
@@ -47,64 +48,92 @@ func (s *BuyBenefitService) BuyBenefit(userId, benefitId string) (*user.UserBene
 		return nil, err
 	}
 	if buyer == nil {
-		return nil, user.ErrSenderNotFound
+		return nil, User.ErrSenderNotFound
 	}
 
-	benefitSold, err := s.benefitRepo.FindByID(ctx, benefitId)
+	benefit, err := s.benefitRepo.FindByID(ctx, benefitId)
 	if err != nil {
 		fmt.Println("Benefit not found:", err)
 		return nil, err
 	}
-	if benefitSold == nil {
-		return nil, benefit.ErrBenefitNotFound
+	if benefit == nil {
+		return nil, Benefit.ErrBenefitNotFound
+	}
+	if benefit.TotalAvailable == 0 {
+		fmt.Println("This benefit is sold out:", err)
+		return nil, err
+	}
+	if benefit.Status != Benefit.ACTIVE {
+		fmt.Println("This benefit cannot be bought:", err)
+		return nil, err
 	}
 
-	storeSeller, err := s.storeRepo.GetSingle(ctx)
+	store, err := s.storeRepo.GetSingle(ctx)
 	if err != nil {
 		fmt.Println("Store not found:", err)
 		return nil, err
 	}
-	if storeSeller == nil {
+	if store == nil {
 		fmt.Println("Store not found:", err)
-		return nil, store.ErrStoreNotFound 
+		return nil, Store.ErrStoreNotFound 
+	}
+	if store.Status == Store.INACTIVE {
+		fmt.Println("Store is inactive:", err)
+		return nil, Store.ErrStoreNotFound 
 	}
 
-	evt, err := buyer.SendCoins(&storeSeller.AdmUser, benefitSold.EarnedCost)
+	// TODO buying logics here
+	evt, err := buyer.SendCoins(&store.AdmUser, benefit.EarnedCost)
 	if err != nil {
 		return nil, err
 	}
 	s.eventBus.Publish(evt)
-	evt2, err := storeSeller.AdmUser.ReceiveCoins(buyer, benefitSold.EarnedCost)
+	evt2, err := store.AdmUser.ReceiveCoins(buyer, benefit.EarnedCost)
 	if err != nil {
 		return nil, err
 	}
 	s.eventBus.Publish(evt2)
-	
 
-	// storeSeller.BenefitQuantity--; // Need to calc
-	storeSeller.TimeLastSale = time.Now()
+	if (store.BenefitQuantity != 0) {
+		store.BenefitQuantity--;
+	}
+	if (benefit.TotalAvailable != 0) {
+		benefit.TotalAvailable--
+	}
+	store.TimeLastSale = time.Now()
 
 	err = s.userRepo.Save(ctx, buyer);
 	if err != nil {
 		fmt.Println("Could not update user:", err)
 		return nil, err
 	}
-	err = s.storeRepo.Save(ctx, storeSeller)
+	err = s.storeRepo.Save(ctx, store)
+	if err != nil {
+		fmt.Println("Could not update store:", err)
+		return nil, err
+	}
+	err = s.userRepo.Save(ctx, &store.AdmUser)
 	if err != nil {
 		fmt.Println("Could not update store:", err)
 		return nil, err
 	}
 
-	benefitPurchase := user.NewUserBenefitPurchase(buyer.ID42, 
-		buyer.Username, benefitSold.ID, benefitSold.Name, benefitSold.EarnedCost, benefitSold.TransferredCost)
+	transfer := Coin.NewTransfer(buyer.ID.Hex(), buyer.Username, store.AdmUser.ID.Hex(), store.AdmUser.Username, benefit.EarnedCost)
+	err = s.transferRepo.Save(ctx, transfer)
+	if err != nil {
+		fmt.Println("Could not register coin transference:", err)
+		return nil, err
+	}
 
+	benefitPurchase := User.NewUserBenefitPurchase(buyer.ID42, 
+		buyer.Username, benefit.ID, benefit.Name, benefit.EarnedCost, benefit.TransferredCost)
 	err = s.benefitPurchaseRepo.Save(ctx, benefitPurchase)
 	if err != nil {
 		fmt.Println("Could not finish purchase:", err)
 		return nil, err
 	}
 
-	purchaseDTO := user.NewUserBenefitPurchaseDTO(*benefitPurchase)
+	purchaseDTO := User.NewUserBenefitPurchaseDTO(*benefitPurchase)
 
 	return purchaseDTO, nil
 }

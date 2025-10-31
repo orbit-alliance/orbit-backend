@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/orbit-alliance/orbit-backend/internal/domain/coin"
+	"github.com/orbit-alliance/orbit-backend/internal/domain/benefit"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
 )
 
@@ -36,6 +37,28 @@ func (u *User) SendCoins(to *User, amount uint64) (*SentCoins, error) {
 	u.CoinStatus.EarnedByActions -= remaining
 
 	return NewSentCoins(u, to, amount), nil
+}
+
+// Try this
+func (u *User) PurchaseBenefit(buyer, storeUser *User, benefit benefit.Benefit) string {
+	var transferUsed uint64
+	var remaining uint64
+
+	if buyer.CoinStatus.EarnedByActions < benefit.EarnedCost {
+		return "fail"
+	}
+
+	if buyer.CoinStatus.EarnedByTransfer >= benefit.TransferredCost {
+		buyer.CoinStatus.EarnedByTransfer -= benefit.TransferredCost
+		transferUsed = benefit.TransferredCost
+		remaining = transferUsed - benefit.TransferredCost
+	} else {
+		transferUsed = buyer.CoinStatus.EarnedByTransfer
+		buyer.CoinStatus.EarnedByTransfer = 0;
+		remaining = benefit.TransferredCost - transferUsed
+	}
+	buyer.CoinStatus.EarnedByActions -= remaining
+	return "success"
 }
 
 func (u *User) ReceiveCoins(from *User, amount uint64) (*ReceivedCoins, error) {
