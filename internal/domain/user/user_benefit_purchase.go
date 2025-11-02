@@ -30,14 +30,15 @@ type UserBenefitPurchase struct {
 
 func NewUserBenefitPurchase(userID, username string, benefitID primitive.ObjectID, benefitName string, earnedCoinsUsed, transferredCoinsUsed uint64) *UserBenefitPurchase {
 	return &UserBenefitPurchase{
-		ID:                   primitive.NewObjectID(),
-		UserID:               userID,
-		Username:             username,
-		BenefitID:            benefitID,
-		BenefitName:          benefitName,
-		EarnedCoinsUsed:      earnedCoinsUsed,
-		TransferredCoinsUsed: transferredCoinsUsed,
-		PurchaseStatus:       PENDING,
-		RequestedAt:          time.Now(),
+		ID:						primitive.NewObjectID(),
+		UserID:					userID,
+		Username:				username,
+		BenefitID:				benefitID,
+		BenefitName:			benefitName,
+		EarnedCoinsUsed:		earnedCoinsUsed,
+		TransferredCoinsUsed:	transferredCoinsUsed,
+		PurchaseStatus:			PENDING,
+		RequestedAt:			time.Now(),
+		UpdatedAt:				time.Now(),
 	}
 }

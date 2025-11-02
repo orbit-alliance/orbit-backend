@@ -92,7 +92,7 @@ func (h *BenefitHandler) UpdateBenefit(w http.ResponseWriter, r *http.Request) {
 
 	benefitInfo, err := h.registerService.UpdateBenefit(
 		r.Context(), payload.StoreId, payload.AdmUserId, payload.BenefitId, payload.Name, payload.Description, 
-		payload.ImageURL, payload.Category, payload.TotalAvailable, payload.MaxPerUser, payload.Status, payload.Tags)
+		payload.ImageURL, payload.Category, payload.EarnedCost, payload.TransferredCost, payload.TotalAvailable, payload.MaxPerUser, payload.Status, payload.Tags)
 	
 	if err != nil {
 		http.Error(w, "Erro ao registrar beneficio: " + err.Error(), http.StatusInternalServerError)

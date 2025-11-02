@@ -9,7 +9,6 @@ import (
 	Benefit "github.com/orbit-alliance/orbit-backend/internal/domain/benefit"
 	Store "github.com/orbit-alliance/orbit-backend/internal/domain/store"
 	User "github.com/orbit-alliance/orbit-backend/internal/domain/user"
-	Coin "github.com/orbit-alliance/orbit-backend/internal/domain/coin"
 )
 
 type BuyBenefitService struct {
@@ -82,13 +81,13 @@ func (s *BuyBenefitService) BuyBenefit(userId, benefitId string) (*User.UserBene
 		return nil, Store.ErrStoreNotFound 
 	}
 
-	// TODO buying logics here
-	evt, err := buyer.SendCoins(&store.AdmUser, benefit.EarnedCost)
+	evt, err  := buyer.PurchaseBenefit(buyer, &store.AdmUser, *benefit)
 	if err != nil {
 		return nil, err
 	}
 	s.eventBus.Publish(evt)
-	evt2, err := store.AdmUser.ReceiveCoins(buyer, benefit.EarnedCost)
+
+	evt2, err := store.ReceivePurchaseCoins(buyer, benefit)
 	if err != nil {
 		return nil, err
 	}
@@ -117,14 +116,12 @@ func (s *BuyBenefitService) BuyBenefit(userId, benefitId string) (*User.UserBene
 		fmt.Println("Could not update store:", err)
 		return nil, err
 	}
-
-	transfer := Coin.NewTransfer(buyer.ID.Hex(), buyer.Username, store.AdmUser.ID.Hex(), store.AdmUser.Username, benefit.EarnedCost)
-	err = s.transferRepo.Save(ctx, transfer)
+	err = s.benefitRepo.Save(ctx, benefit)
 	if err != nil {
-		fmt.Println("Could not register coin transference:", err)
+		fmt.Println("Could not update benefit:", err)
 		return nil, err
 	}
-
+	
 	benefitPurchase := User.NewUserBenefitPurchase(buyer.ID42, 
 		buyer.Username, benefit.ID, benefit.Name, benefit.EarnedCost, benefit.TransferredCost)
 	err = s.benefitPurchaseRepo.Save(ctx, benefitPurchase)

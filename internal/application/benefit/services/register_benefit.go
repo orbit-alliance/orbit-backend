@@ -85,7 +85,7 @@ func (s *RegisterBenefitService) RegisterBenefit(
 
 func (s *RegisterBenefitService) UpdateBenefit(
 	ctx context.Context, storeId, admUserId, benefitId, name, description, imageUrl, category string, 
-	totalAvailable, maxPerUser uint64, status Benefit.BenefitStatus, tags []string) (*Benefit.BenefitInfoDTO, error) {
+	earnedCost, transferedCost, totalAvailable, maxPerUser uint64, status Benefit.BenefitStatus, tags []string) (*Benefit.BenefitInfoDTO, error) {
 
 	store, err := s.storeRepo.FindByID(ctx, storeId)
 	if err != nil {
@@ -101,6 +101,8 @@ func (s *RegisterBenefitService) UpdateBenefit(
 	benefit.Description = description
 	benefit.ImageURL = imageUrl
 	benefit.Category = category
+	benefit.EarnedCost = earnedCost
+	benefit.TransferredCost = transferedCost
 	benefit.MaxPerUser = maxPerUser
 	benefit.LastUpdated = time.Now()
 	benefit.Status = status
