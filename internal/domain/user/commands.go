@@ -39,7 +39,7 @@ func (u *User) SendCoins(to *User, amount uint64) (*SentCoins, error) {
 	return NewSentCoins(u, to, amount), nil
 }
 
-func (u *User) PurchaseBenefit(buyer, storeUser *User, benefit benefit.Benefit) (*SentCoins, error) {
+func (u *User) PurchaseBenefit(storeUser *User, benefit benefit.Benefit) (*SentCoins, error) {
 	var transferUsed uint64
 	var remaining uint64
 	totalCost := benefit.EarnedCost + benefit.TransferredCost

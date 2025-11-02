@@ -3,6 +3,7 @@ package user
 import (
 	"time"
 
+	"github.com/orbit-alliance/orbit-backend/internal/domain/benefit"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -19,7 +20,7 @@ type UserBenefitPurchase struct {
 	ID                   primitive.ObjectID        `json:"id" bson:"_id"`
 	UserID               string                    `json:"user_id" bson:"user_id"`
 	Username             string                    `json:"username" bson:"username"`
-	BenefitID            primitive.ObjectID        `json:"benefit_id" bson:"benefit_id"`
+	BenefitID            string					   `json:"benefit_id" bson:"benefit_id"`
 	BenefitName          string                    `json:"benefit_name" bson:"benefit_name"`
 	EarnedCoinsUsed      uint64                    `json:"earned_coins_used" bson:"earned_coins_used"`
 	TransferredCoinsUsed uint64                    `json:"transferred_coins_used" bson:"transferred_coins_used"`
@@ -28,15 +29,15 @@ type UserBenefitPurchase struct {
 	UpdatedAt            time.Time                 `json:"updated_at" bson:"updated_at"`
 }
 
-func NewUserBenefitPurchase(userID, username string, benefitID primitive.ObjectID, benefitName string, earnedCoinsUsed, transferredCoinsUsed uint64) *UserBenefitPurchase {
+func NewUserBenefitPurchase(u *User, b *benefit.Benefit) *UserBenefitPurchase {
 	return &UserBenefitPurchase{
 		ID:						primitive.NewObjectID(),
-		UserID:					userID,
-		Username:				username,
-		BenefitID:				benefitID,
-		BenefitName:			benefitName,
-		EarnedCoinsUsed:		earnedCoinsUsed,
-		TransferredCoinsUsed:	transferredCoinsUsed,
+		UserID:					u.ID.Hex(),
+		Username:				u.Username,
+		BenefitID:				b.ID.Hex(),
+		BenefitName:			b.Name,
+		EarnedCoinsUsed:		b.EarnedCost,
+		TransferredCoinsUsed:	b.TransferredCost,
 		PurchaseStatus:			PENDING,
 		RequestedAt:			time.Now(),
 		UpdatedAt:				time.Now(),

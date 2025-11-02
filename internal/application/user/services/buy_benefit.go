@@ -37,19 +37,19 @@ func NewBuyBenefitService(
 	}
 }
 
-func (s *BuyBenefitService) BuyBenefit(userId, benefitId string) (*User.UserBenefitPurchaseDTO, error) {
-	
-	ctx := context.Background()
-
-	buyer, err := s.userRepo.FindByID(ctx, userId)
+func GetUser(s *BuyBenefitService, ctx context.Context, userId string) (*User.User, error) {
+	user, err := s.userRepo.FindByID(ctx, userId)
 	if err != nil {
 		fmt.Println("User not found:", err)
 		return nil, err
 	}
-	if buyer == nil {
+	if user == nil {
 		return nil, User.ErrSenderNotFound
 	}
+	return user, nil
+}
 
+func GetBenefit(s *BuyBenefitService, ctx context.Context, benefitId string) (*Benefit.Benefit, error) {
 	benefit, err := s.benefitRepo.FindByID(ctx, benefitId)
 	if err != nil {
 		fmt.Println("Benefit not found:", err)
@@ -66,7 +66,10 @@ func (s *BuyBenefitService) BuyBenefit(userId, benefitId string) (*User.UserBene
 		fmt.Println("This benefit cannot be bought:", err)
 		return nil, err
 	}
+	return benefit, nil
+}
 
+func GetStore(s *BuyBenefitService, ctx context.Context) (*Store.Store, error) {
 	store, err := s.storeRepo.GetSingle(ctx)
 	if err != nil {
 		fmt.Println("Store not found:", err)
@@ -80,14 +83,29 @@ func (s *BuyBenefitService) BuyBenefit(userId, benefitId string) (*User.UserBene
 		fmt.Println("Store is inactive:", err)
 		return nil, Store.ErrStoreNotFound 
 	}
+	return store, nil
+}
 
-	evt, err  := buyer.PurchaseBenefit(buyer, &store.AdmUser, *benefit)
+func (s *BuyBenefitService) BuyBenefit(userId, benefitId string) (*User.UserBenefitPurchaseDTO, error) {
+	
+	ctx := context.Background()
+
+	user, err := GetUser(s, ctx, userId)
+	if err != nil { return nil, err }
+
+	benefit, err := GetBenefit(s, ctx, benefitId)
+	if err != nil { return nil, err }
+	
+	store, err := GetStore(s, ctx)
+	if err != nil { return nil, err }
+
+	evt, err  := user.PurchaseBenefit(&store.AdmUser, *benefit)
 	if err != nil {
 		return nil, err
 	}
 	s.eventBus.Publish(evt)
 
-	evt2, err := store.ReceivePurchaseCoins(buyer, benefit)
+	evt2, err := store.ReceivePurchaseCoins(user, benefit)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +119,7 @@ func (s *BuyBenefitService) BuyBenefit(userId, benefitId string) (*User.UserBene
 	}
 	store.TimeLastSale = time.Now()
 
-	err = s.userRepo.Save(ctx, buyer);
+	err = s.userRepo.Save(ctx, user);
 	if err != nil {
 		fmt.Println("Could not update user:", err)
 		return nil, err
@@ -122,8 +140,7 @@ func (s *BuyBenefitService) BuyBenefit(userId, benefitId string) (*User.UserBene
 		return nil, err
 	}
 	
-	benefitPurchase := User.NewUserBenefitPurchase(buyer.ID42, 
-		buyer.Username, benefit.ID, benefit.Name, benefit.EarnedCost, benefit.TransferredCost)
+	benefitPurchase := User.NewUserBenefitPurchase(user, benefit)
 	err = s.benefitPurchaseRepo.Save(ctx, benefitPurchase)
 	if err != nil {
 		fmt.Println("Could not finish purchase:", err)

@@ -34,7 +34,7 @@ func NewRegisterBenefitService(
 	}
 }
 
-func isValidAdmUser(s *RegisterBenefitService, ctx context.Context, store Store.Store, admUserId string) bool {
+func isValidStoreAdmUser(s *RegisterBenefitService, ctx context.Context, store Store.Store, admUserId string) bool {
 	user, err := s.userRepo.FindByID(ctx, admUserId)
 	if err != nil {
 		fmt.Println("Store adm user not found:", err)
@@ -59,7 +59,7 @@ func (s *RegisterBenefitService) RegisterBenefit(
 		fmt.Println("Store to register benefit not found:", err)
 		return nil, err
 	}
-	if (!isValidAdmUser(s, ctx, *store, admUserId)) {
+	if (!isValidStoreAdmUser(s, ctx, *store, admUserId)) {
 		return nil, errors.New("Could not validate user:")
 	}
 
@@ -92,7 +92,7 @@ func (s *RegisterBenefitService) UpdateBenefit(
 		fmt.Println("Store to register benefit not found:", err)
 		return nil, err
 	}
-	if (!isValidAdmUser(s, ctx, *store, admUserId)) {
+	if (!isValidStoreAdmUser(s, ctx, *store, admUserId)) {
 		return nil, errors.New("Could not validate user")
 	}
 
@@ -136,7 +136,7 @@ func (s *RegisterBenefitService) DeleteBenefit(ctx context.Context, storeId, adm
 		fmt.Println("Store to register benefit not found:", err)
 		return nil, err
 	}
-	if (!isValidAdmUser(s, ctx, *store, admUserId)) {
+	if (!isValidStoreAdmUser(s, ctx, *store, admUserId)) {
 		return nil, errors.New("Could not validate user")
 	}
 

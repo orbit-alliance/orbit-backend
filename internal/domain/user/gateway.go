@@ -79,7 +79,7 @@ func NewUserBenefitPurchaseDTO(purchase UserBenefitPurchase) *UserBenefitPurchas
 		ID:						purchase.ID.Hex(),
 		UserID:					purchase.UserID,
 		Username:				purchase.Username,
-		BenefitID:				purchase.BenefitID.Hex(),
+		BenefitID:				purchase.BenefitID,
 		BenefitName:			purchase.BenefitName,
 		EarnedCoinsUsed:		purchase.EarnedCoinsUsed,
 		TransferredCoinsUsed:	purchase.TransferredCoinsUsed,
