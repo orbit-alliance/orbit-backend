@@ -63,7 +63,7 @@ func (u *User) PurchaseBenefit(storeUser *User, benefit benefit.Benefit) (*SentC
 }
 
 func (u *User) ReceiveCoins(from *User, amount uint64) (*ReceivedCoins, error) {
-	u.CoinStatus.EarnedByTransfer += amount
+	u.CoinStatus.EarnedByActions += amount
 
 	return NewReceivedCoins(from, u, amount), nil
 }
