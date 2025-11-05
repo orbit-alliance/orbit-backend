@@ -1,9 +1,9 @@
 FROM golang:1.24.2-alpine AS builder
 
 WORKDIR /app
-COPY go.mod go.sum ./
-RUN go mod tidy
+RUN go mod init github.com/orbit-alliance/orbit-backend
 COPY . .
+RUN go mod tidy
 RUN go build -o app ./cmd
 FROM gcr.io/distroless/base-debian12
 WORKDIR /app
