@@ -48,24 +48,18 @@ func isValidStoreAdmUser(s *RegisterBenefitService, ctx context.Context, store S
 }
 
 func (s *RegisterBenefitService) RegisterBenefit(
-	ctx context.Context, 
-	storeId, admUserId, name, description, imageUrl, category string, 
-	earnedCost, transferedCost, totalAvailable, maxPerUser uint64, 
-	status Benefit.BenefitStatus, 
-	tags []string) (*Benefit.BenefitInfoDTO, error) {
+	ctx context.Context, payload Benefit.BenefitPayload) (*Benefit.BenefitInfoDTO, error) {
 	
-	store, err := s.storeRepo.FindByID(ctx, storeId)
+	store, err := s.storeRepo.FindByID(ctx, payload.StoreId)
 	if err != nil {
 		fmt.Println("Store to register benefit not found:", err)
 		return nil, err
 	}
-	if (!isValidStoreAdmUser(s, ctx, *store, admUserId)) {
+	if (!isValidStoreAdmUser(s, ctx, *store, payload.AdmUserId)) {
 		return nil, errors.New("Could not validate user:")
 	}
 
-	newBenefit := Benefit.NewBenefit(primitive.NewObjectID(), 
-		name, description, imageUrl, category, store.AdmUser.Username,
-		earnedCost, transferedCost, totalAvailable, maxPerUser, status, tags)
+	newBenefit := Benefit.NewBenefit(primitive.NewObjectID(), payload, store.AdmUser.Username)
 	err = s.benefitRepo.Save(ctx, newBenefit)
 	if (err != nil) {
 		fmt.Println("Error trying to save benefit:", err)
@@ -84,31 +78,30 @@ func (s *RegisterBenefitService) RegisterBenefit(
 }
 
 func (s *RegisterBenefitService) UpdateBenefit(
-	ctx context.Context, storeId, admUserId, benefitId, name, description, imageUrl, category string, 
-	earnedCost, transferedCost, totalAvailable, maxPerUser uint64, status Benefit.BenefitStatus, tags []string) (*Benefit.BenefitInfoDTO, error) {
+	ctx context.Context, payload Benefit.BenefitPayload) (*Benefit.BenefitInfoDTO, error) {
 
-	store, err := s.storeRepo.FindByID(ctx, storeId)
+	store, err := s.storeRepo.FindByID(ctx, payload.StoreId)
 	if err != nil {
 		fmt.Println("Store to register benefit not found:", err)
 		return nil, err
 	}
-	if (!isValidStoreAdmUser(s, ctx, *store, admUserId)) {
+	if (!isValidStoreAdmUser(s, ctx, *store, payload.AdmUserId)) {
 		return nil, errors.New("Could not validate user")
 	}
 
-	benefit, err := s.benefitRepo.FindByID(ctx, benefitId)
-	benefit.Name = name
-	benefit.Description = description
-	benefit.ImageURL = imageUrl
-	benefit.Category = category
-	benefit.EarnedCost = earnedCost
-	benefit.TransferredCost = transferedCost
-	benefit.MaxPerUser = maxPerUser
+	benefit, err := s.benefitRepo.FindByID(ctx, payload.BenefitId)
+	benefit.Name = payload.Name
+	benefit.Description = payload.Description
+	benefit.ImageURL = payload.ImageURL
+	benefit.Category = payload.Category
+	benefit.EarnedCost = payload.EarnedCost
+	benefit.TransferredCost = payload.TransferredCost
+	benefit.MaxPerUser = payload.MaxPerUser
 	benefit.LastUpdated = time.Now()
-	benefit.Status = status
-	benefit.Tags = tags
+	benefit.Status = payload.Status
+	benefit.Tags = payload.Tags
 	store.BenefitQuantity -= benefit.TotalAvailable
-	benefit.TotalAvailable = totalAvailable
+	benefit.TotalAvailable = payload.TotalAvailable
 	store.BenefitQuantity += benefit.TotalAvailable
 
 	// TODO check if use Save or Update
@@ -129,18 +122,18 @@ func (s *RegisterBenefitService) UpdateBenefit(
 	return benefitDTO, nil
 }
 
-func (s *RegisterBenefitService) DeleteBenefit(ctx context.Context, storeId, admUserId, benefitId string) (*Benefit.BenefitInfoDTO, error) {
+func (s *RegisterBenefitService) DeleteBenefit(ctx context.Context, payload Benefit.BenefitPayload) (*Benefit.BenefitInfoDTO, error) {
 	
-	store, err := s.storeRepo.FindByID(ctx, storeId)
+	store, err := s.storeRepo.FindByID(ctx, payload.StoreId)
 	if err != nil {
 		fmt.Println("Store to register benefit not found:", err)
 		return nil, err
 	}
-	if (!isValidStoreAdmUser(s, ctx, *store, admUserId)) {
+	if (!isValidStoreAdmUser(s, ctx, *store, payload.AdmUserId)) {
 		return nil, errors.New("Could not validate user")
 	}
 
-	benefit, err := s.benefitRepo.FindByID(ctx, benefitId)
+	benefit, err := s.benefitRepo.FindByID(ctx, payload.BenefitId)
 	if err != nil {
 		fmt.Println("Could not find benefit")
 		return nil, err

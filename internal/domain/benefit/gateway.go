@@ -41,3 +41,20 @@ func NewBenefitInfoDTO(benefit Benefit) *BenefitInfoDTO {
 		AvailableEnd:		benefit.AvailableEnd,
 	}
 }
+
+type BenefitPayload struct {
+	StoreId			string					`json:"store_id"`
+	AdmUserId		string					`json:"adm_user_id"`
+	Name			string					`json:"name"`
+	Description		string					`json:"description"`
+	ImageURL		string					`json:"image_url"`
+	Category		string					`json:"category"`
+	EarnedCost		uint64					`json:"earned_cost"`
+	TransferredCost	uint64					`json:"transferred_cost"`
+	TotalAvailable	uint64					`json:"total_available"`
+	MaxPerUser		uint64					`json:"max_per_user"`
+	BenefitId		string					`json:"benefit_id"`
+	Tags			[]string				`json:"tags"`	
+	Status			BenefitStatus			`json:"status"`
+}
+

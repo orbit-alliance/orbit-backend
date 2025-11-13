@@ -20,22 +20,6 @@ func NewBenefitHandler(registerService *services.RegisterBenefitService) *Benefi
 	}
 }
 
-type BenefitPayload struct {
-	StoreId			string					`json:"store_id"`
-	AdmUserId		string					`json:"adm_user_id"`
-	Name			string					`json:"name"`
-	Description		string					`json:"description"`
-	ImageURL		string					`json:"image_url"`
-	Category		string					`json:"category"`
-	EarnedCost		uint64					`json:"earned_cost"`
-	TransferredCost	uint64					`json:"transferred_cost"`
-	TotalAvailable	uint64					`json:"total_available"`
-	MaxPerUser		uint64					`json:"max_per_user"`
-	BenefitId		string					`json:"benefit_id"`
-	Tags			[]string				`json:"tags"`	
-	Status			benefit.BenefitStatus	`json:"status"`
-}
-
 func CheckAuthorizarionHeader(w http.ResponseWriter, r *http.Request) bool {
 	
 	authHeader := r.Header.Get("Authorization")
@@ -58,16 +42,14 @@ func (h *BenefitHandler) RegisterBenefit(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	var payload BenefitPayload
+	var payload benefit.BenefitPayload
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
 	
-	benefitInfo, err := h.registerService.RegisterBenefit(
-		r.Context(), payload.StoreId, payload.AdmUserId, payload.Name, payload.Description,
-		payload.ImageURL, payload.Category, payload.EarnedCost, payload.TransferredCost, payload.TotalAvailable, payload.MaxPerUser, payload.Status, payload.Tags)
+	benefitInfo, err := h.registerService.RegisterBenefit(r.Context(), payload)
 	if err != nil {
 		http.Error(w, "Erro ao registrar beneficio: " + err.Error(), http.StatusInternalServerError)
 		return
@@ -83,17 +65,14 @@ func (h *BenefitHandler) UpdateBenefit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var payload BenefitPayload
+	var payload benefit.BenefitPayload
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
 
-	benefitInfo, err := h.registerService.UpdateBenefit(
-		r.Context(), payload.StoreId, payload.AdmUserId, payload.BenefitId, payload.Name, payload.Description, 
-		payload.ImageURL, payload.Category, payload.EarnedCost, payload.TransferredCost, payload.TotalAvailable, payload.MaxPerUser, payload.Status, payload.Tags)
-	
+	benefitInfo, err := h.registerService.UpdateBenefit(r.Context(), payload)
 	if err != nil {
 		http.Error(w, "Erro ao registrar beneficio: " + err.Error(), http.StatusInternalServerError)
 		return
@@ -109,14 +88,14 @@ func (h *BenefitHandler) DeleteBenefit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	var payload BenefitPayload
+	var payload benefit.BenefitPayload
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
 
-	benefitDTO, err := h.registerService.DeleteBenefit(r.Context(), payload.StoreId, payload.AdmUserId, payload.BenefitId)
+	benefitDTO, err := h.registerService.DeleteBenefit(r.Context(), payload)
 	if err != nil {
 		http.Error(w, "Erro ao deletar beneficio: " + err.Error(), http.StatusInternalServerError)
 		return

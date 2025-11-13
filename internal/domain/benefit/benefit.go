@@ -35,28 +35,24 @@ type Benefit struct {
 }
 
 func NewBenefit (
-	id primitive.ObjectID, 
-	name, description, imageUrl, category, createdBy string, 
-	earnedCost, transferredCost, totalAvailable, maxPeruser uint64, 
-	status BenefitStatus, 
-	tags []string) *Benefit {
+	id primitive.ObjectID, b BenefitPayload, createdBy string) *Benefit {
 	return &Benefit{
 		ID:					id,
-		Name:				name,
-		Description:		description,
-		ImageURL:			imageUrl,
-		Category:			category,
+		Name:				b.Name,
+		Description:		b.Description,
+		ImageURL:			b.ImageURL,
+		Category:			b.Category,
 		CreatedBy:			createdBy,
-		EarnedCost:			earnedCost,
-		TransferredCost:	transferredCost,
-		TotalAvailable:		totalAvailable,
-		MaxPerUser:			maxPeruser,
-		Status:				status,
+		EarnedCost:			b.EarnedCost,
+		TransferredCost:	b.TransferredCost,
+		TotalAvailable:		b.TotalAvailable,
+		MaxPerUser:			b.MaxPerUser,
+		Status:				b.Status,
 		CreatedAt:			time.Now(),
 		LastUpdated:		time.Now(),
 		AvailableStart:		time.Now(),
 		AvailableEnd:		time.Now(),
 		DeletedTime:		time.Time{},
-		Tags:				tags,
+		Tags:				b.Tags,
 	}
 }

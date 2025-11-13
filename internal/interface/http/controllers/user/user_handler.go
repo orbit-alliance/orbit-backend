@@ -2,8 +2,8 @@ package user_controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/orbit-alliance/orbit-backend/internal/application/user/services"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
@@ -35,7 +35,6 @@ func (h *UserHandler) Register42User(w http.ResponseWriter, r *http.Request) {
 
 
 	var payload RequestPayload
-	fmt.Println("Body:", r.Body)
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
