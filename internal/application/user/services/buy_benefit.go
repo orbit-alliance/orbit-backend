@@ -37,7 +37,7 @@ func NewBuyBenefitService(
 	}
 }
 
-func GetUser(s *BuyBenefitService, ctx context.Context, userId string) (*User.User, error) {
+func getUser(s *BuyBenefitService, ctx context.Context, userId string) (*User.User, error) {
 	user, err := s.userRepo.FindByID(ctx, userId)
 	if err != nil {
 		fmt.Println("User not found:", err)
@@ -49,7 +49,7 @@ func GetUser(s *BuyBenefitService, ctx context.Context, userId string) (*User.Us
 	return user, nil
 }
 
-func GetBenefit(s *BuyBenefitService, ctx context.Context, benefitId string) (*Benefit.Benefit, error) {
+func getBenefit(s *BuyBenefitService, ctx context.Context, benefitId string) (*Benefit.Benefit, error) {
 	benefit, err := s.benefitRepo.FindByID(ctx, benefitId)
 	if err != nil {
 		fmt.Println("Benefit not found:", err)
@@ -69,7 +69,7 @@ func GetBenefit(s *BuyBenefitService, ctx context.Context, benefitId string) (*B
 	return benefit, nil
 }
 
-func GetStore(s *BuyBenefitService, ctx context.Context) (*Store.Store, error) {
+func getStore(s *BuyBenefitService, ctx context.Context) (*Store.Store, error) {
 	store, err := s.storeRepo.GetSingle(ctx)
 	if err != nil {
 		fmt.Println("Store not found:", err)
@@ -90,21 +90,25 @@ func (s *BuyBenefitService) BuyBenefit(userId, benefitId string) (*User.UserBene
 	
 	ctx := context.Background()
 
-	user, err := GetUser(s, ctx, userId)
+	user, err := getUser(s, ctx, userId)
 	if err != nil { return nil, err }
+	if user == nil { return nil, nil }
 
-	benefit, err := GetBenefit(s, ctx, benefitId)
+	benefit, err := getBenefit(s, ctx, benefitId)
 	if err != nil { return nil, err }
+	if benefit == nil { return nil, nil}
 	
-	store, err := GetStore(s, ctx)
+	store, err := getStore(s, ctx)
 	if err != nil { return nil, err }
+	if store == nil { return nil, nil }
 
-	evt, err  := user.PurchaseBenefit(&store.AdmUser, *benefit)
+	evt, err  := user.PurchaseBenefit(&store.AdmUser, benefit)
 	if err != nil {
 		return nil, err
 	}
-	s.eventBus.Publish(evt)
+	s.eventBus.Publish(evt);
 
+	// Use user.receivedCoins 
 	evt2, err := store.ReceivePurchaseCoins(user, benefit)
 	if err != nil {
 		return nil, err

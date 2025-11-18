@@ -36,7 +36,7 @@ func NewRegisterBenefitService(
 
 func isValidStoreAdmUser(s *RegisterBenefitService, ctx context.Context, store Store.Store, admUserId string) bool {
 	user, err := s.userRepo.FindByID(ctx, admUserId)
-	if err != nil {
+	if err != nil || user == nil {
 		fmt.Println("Store adm user not found:", err)
 		return false
 	}

@@ -39,7 +39,7 @@ func (u *User) SendCoins(to *User, amount uint64) (*SentCoins, error) {
 	return NewSentCoins(u, to, amount), nil
 }
 
-func (u *User) PurchaseBenefit(storeUser *User, benefit benefit.Benefit) (*SentCoins, error) {
+func (u *User) PurchaseBenefit(storeUser *User, benefit *benefit.Benefit) (*PurchasedUserBenefit, error) {
 	var transferUsed uint64
 	var remaining uint64
 	totalCost := benefit.EarnedCost + benefit.TransferredCost
@@ -56,14 +56,13 @@ func (u *User) PurchaseBenefit(storeUser *User, benefit benefit.Benefit) (*SentC
 	}
 	
 	remaining = totalCost - transferUsed
-	
 	u.CoinStatus.EarnedByTransfer -= transferUsed
 	u.CoinStatus.EarnedByActions -= remaining
-	return NewSentCoins(u, storeUser, totalCost), nil
+	return NewPurchasedUserBenefit(u, benefit, remaining, transferUsed), nil;
 }
 
 func (u *User) ReceiveCoins(from *User, amount uint64) (*ReceivedCoins, error) {
-	u.CoinStatus.EarnedByActions += amount
+	u.CoinStatus.EarnedByTransfer += amount
 
 	return NewReceivedCoins(from, u, amount), nil
 }

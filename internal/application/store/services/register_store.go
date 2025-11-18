@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/store"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type RegisterStoreService struct {
@@ -43,6 +43,10 @@ func (s *RegisterStoreService) RegisterStore(ctx context.Context, userId, wallet
 	if err != nil {
 		fmt.Println("User to register store not found:", err)
 		return nil, err
+	}
+	if user == nil {
+		fmt.Println("User to register store not found")
+		return nil, nil
 	}
 	newStore := store.NewStore(primitive.NewObjectID(), *user, walletAddress, *coinStatus)
 	err = s.storeRepo.Save(ctx, newStore)

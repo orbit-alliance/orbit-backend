@@ -116,8 +116,12 @@ func (h *UserHandler) UserBuyBenefit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	purchaseDT0, err := h.buyBenefitService.BuyBenefit(payload.UserId, payload.BenefitId)
+	purchaseDTO, err := h.buyBenefitService.BuyBenefit(payload.UserId, payload.BenefitId)
+	if err != nil || purchaseDTO == nil {
+		http.Error(w, "Error when buying benefit", http.StatusBadRequest)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(purchaseDT0)
+	json.NewEncoder(w).Encode(purchaseDTO)
 }
