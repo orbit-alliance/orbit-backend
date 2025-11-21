@@ -108,7 +108,6 @@ func (s *BuyBenefitService) BuyBenefit(userId, benefitId string) (*User.UserBene
 	}
 	s.eventBus.Publish(evt);
 
-	// Use user.receivedCoins 
 	evt2, err := store.ReceivePurchaseCoins(user, benefit)
 	if err != nil {
 		return nil, err
