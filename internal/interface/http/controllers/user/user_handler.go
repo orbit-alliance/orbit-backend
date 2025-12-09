@@ -10,19 +10,19 @@ import (
 )
 
 type UserHandler struct {
-	registerService			*services.Register42Service
-	transferCoinsService	*services.TransferCoinsService
-	buyBenefitService		*services.BuyBenefitService
+	registerService      *services.Register42Service
+	transferCoinsService *services.TransferCoinsService
+	buyBenefitService    *services.BuyBenefitService
 }
 
 func NewUserHandler(
-	registerService *services.Register42Service, 
-	transferCoinsService *services.TransferCoinsService,  
+	registerService *services.Register42Service,
+	transferCoinsService *services.TransferCoinsService,
 	buyBenefitService *services.BuyBenefitService) *UserHandler {
 	return &UserHandler{
-		registerService:		registerService,
-		transferCoinsService:	transferCoinsService,
-		buyBenefitService:		buyBenefitService,
+		registerService:      registerService,
+		transferCoinsService: transferCoinsService,
+		buyBenefitService:    buyBenefitService,
 	}
 }
 
@@ -32,7 +32,6 @@ type RequestPayload struct {
 }
 
 func (h *UserHandler) Register42User(w http.ResponseWriter, r *http.Request) {
-
 
 	var payload RequestPayload
 	err := json.NewDecoder(r.Body).Decode(&payload)
@@ -54,11 +53,10 @@ func (h *UserHandler) Register42User(w http.ResponseWriter, r *http.Request) {
 }
 
 type TransferCoinsPayload struct {
-	From		string	`json:"from"`
-	To			string	`json:"to"`
-	Amount		uint64	`json:"amount"`
+	From   string `json:"from"`
+	To     string `json:"to"`
+	Amount uint64 `json:"amount"`
 }
-
 
 func (h *UserHandler) TransferCoins(w http.ResponseWriter, r *http.Request) {
 	authHeader := r.Header.Get("Authorization")
@@ -73,7 +71,7 @@ func (h *UserHandler) TransferCoins(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var     payload TransferCoinsPayload
+	var payload TransferCoinsPayload
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
@@ -91,12 +89,12 @@ func (h *UserHandler) TransferCoins(w http.ResponseWriter, r *http.Request) {
 }
 
 type BuyBenfitPayload struct {
-	UserId		string	`json:"user_id"`
-	BenefitId	string	`json:"benefit_id"`
+	UserId    string `json:"user_id"`
+	BenefitId string `json:"benefit_id"`
 }
 
 func (h *UserHandler) UserBuyBenefit(w http.ResponseWriter, r *http.Request) {
-	
+
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
 		http.Error(w, "Authorization header missing", http.StatusUnauthorized)
