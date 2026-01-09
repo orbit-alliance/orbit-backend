@@ -14,7 +14,7 @@ type TransferRepository struct {
 }
 
 func NewTransferRepository(db *mongo.Database) *TransferRepository {
-	collection := db.Collection("Transfers")
+	collection := db.Collection("transfers")
 	return &TransferRepository{collection: collection}
 }
 

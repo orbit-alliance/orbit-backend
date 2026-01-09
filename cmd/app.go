@@ -10,6 +10,8 @@ import (
 	"syscall"
 	"time"
 
+	storeServices "github.com/orbit-alliance/orbit-backend/internal/application/store/services"
+	benefitServices "github.com/orbit-alliance/orbit-backend/internal/application/benefit/services"
 	"github.com/orbit-alliance/orbit-backend/internal/application/user/services"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/user"
@@ -18,7 +20,9 @@ import (
 	seed "github.com/orbit-alliance/orbit-backend/internal/infra/db/seeds"
 	"github.com/orbit-alliance/orbit-backend/internal/infra/gateway_42"
 	"github.com/orbit-alliance/orbit-backend/internal/infra/web3"
+	store_controller "github.com/orbit-alliance/orbit-backend/internal/interface/http/controllers/store"
 	user_controller "github.com/orbit-alliance/orbit-backend/internal/interface/http/controllers/user"
+	benefit_controller "github.com/orbit-alliance/orbit-backend/internal/interface/http/controllers/benefit"
 	"github.com/robfig/cron/v3"
 )
 
@@ -51,6 +55,9 @@ func NewApp(cfg Config) (*App, func()) {
 	goodActionRepo := repo.NewGoodActionRepository(db.Database)
 	userProjectRepo := repo.NewUserProjectRepository(db.Database)
 	userGoodActionRepo := repo.NewUserGoodActionRepository(db.Database)
+	storeRepo := repo.NewStoreRepository(db.Database)
+	benefitRepo := repo.NewBenefitRepository(db.Database)
+	userBenefitPurchaseRepo := repo.NewUserBenefitPurchaseRepository(db.Database)
 	// …
 
 	// ---------- Seeds ----------
@@ -60,6 +67,7 @@ func NewApp(cfg Config) (*App, func()) {
 	// ---------- Serviços ----------
 	register42Service := services.NewRegister42Service(userRepo, eventBus, gateway42, ethGateway)
 	transferCoinsService := services.NewTransferCoinsService(userRepo, transferRepo, eventBus)
+	buyBenefitService := services.NewBuyBenefitService(userRepo, benefitRepo, storeRepo, transferRepo, userBenefitPurchaseRepo, eventBus)
 	userBonusProjectService := services.NewBonusProjectService(
 		userRepo,
 		eventBus,
@@ -76,10 +84,15 @@ func NewApp(cfg Config) (*App, func()) {
 		eventBus,
 	)
 	goodActionPublisher := services.NewOnChainGoodActionPublisher(ethGateway)
+	registerStoreService := storeServices.NewRegisterStoreService(storeRepo, userRepo, eventBus, ethGateway)
+	registerBenefitService := benefitServices.NewRegisterBenefitService(benefitRepo, storeRepo, userRepo, eventBus)
+
 	// …
 
 	// ---------- Controladores ----------
-	userController := user_controller.NewUserHandler(register42Service)
+	userController := user_controller.NewUserHandler(register42Service, transferCoinsService, buyBenefitService)
+	storeController := store_controller.NewStoreHandler(registerStoreService)
+	benefitController := benefit_controller.NewBenefitHandler(registerBenefitService)
 	// …
 
 	// ---------- Register Domain Events ----------
@@ -103,7 +116,7 @@ func NewApp(cfg Config) (*App, func()) {
 	}
 
 	// ---------- HTTP ----------
-	router := buildHTTP(cfg, userController /* , outros handlers ... */)
+	router := buildHTTP(cfg, userController, storeController, benefitController /* , outros handlers ... */)
 
 	app := &App{router: router, jobs: jobs, c: c}
 

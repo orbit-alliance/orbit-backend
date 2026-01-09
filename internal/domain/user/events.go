@@ -1,6 +1,11 @@
 package user
 
-import "github.com/orbit-alliance/orbit-backend/internal/domain/shared"
+import (
+	"time"
+
+	"github.com/orbit-alliance/orbit-backend/internal/domain/benefit"
+	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
+)
 
 type User42Registered struct {
 	shared.BaseEvent
@@ -49,6 +54,32 @@ func NewSentCoins(from, to *User, amount uint64) *SentCoins {
 		Amount:    amount,
 		From:      from,
 		To:        to,
+	}
+}
+
+type PurchasedUserBenefit struct {
+	shared.BaseEvent
+	User					*User
+	Benefit					*benefit.Benefit
+	EarnedCoinsUsed			uint64                  
+	TransferredCoinsUsed	uint64                  
+	// PurchaseStatus			UserBenefitPurchaseStatus // TODO check if purchase_status is needed
+	RequestedAt				time.Time
+	UpdatedAt				time.Time
+}
+func (e PurchasedUserBenefit) EventType() string {
+	return "user.PurchasedUserBenefit"
+}
+
+func NewPurchasedUserBenefit(user *User, benefit *benefit.Benefit, earnedUsed, transfUsed uint64) *PurchasedUserBenefit {
+	return &PurchasedUserBenefit{
+		User: user,
+		Benefit: benefit,
+		EarnedCoinsUsed: earnedUsed,
+		TransferredCoinsUsed: transfUsed,
+		// PurchaseStatus: p.PurchaseStatus, // TODO check if purchase_status is needed
+		RequestedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 }
 

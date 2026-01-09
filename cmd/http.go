@@ -6,12 +6,16 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	user_controller "github.com/orbit-alliance/orbit-backend/internal/interface/http/controllers/user"
+	store_controller "github.com/orbit-alliance/orbit-backend/internal/interface/http/controllers/store"
+	benefit_controller "github.com/orbit-alliance/orbit-backend/internal/interface/http/controllers/benefit"
 	"github.com/orbit-alliance/orbit-backend/internal/interface/http/routes"
 )
 
-func buildHTTP(cfg Config, userHandler *user_controller.UserHandler) *http.Server {
+func buildHTTP(cfg Config, userHandler *user_controller.UserHandler, storeHandler *store_controller.StoreHandler, benefitHandler *benefit_controller.BenefitHandler) *http.Server {
 	r := mux.NewRouter()
 	routes.RegisterUserRoutes(r, userHandler)
+	routes.RegisterStoreRoutes(r, storeHandler)
+	routes.RegisterBenefitRoutes(r, benefitHandler)	
 
 	cors := handlers.CORS(
 		handlers.AllowedOrigins([]string{cfg.ALLOWED_ORIGINS}),

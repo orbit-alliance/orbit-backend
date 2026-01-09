@@ -1,3 +1,5 @@
+// TODO This file has been moved to benefit domain
+
 package coin
 
 import (

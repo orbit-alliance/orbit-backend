@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/orbit-alliance/orbit-backend/internal/domain/coin"
+	"github.com/orbit-alliance/orbit-backend/internal/domain/benefit"
 	"github.com/orbit-alliance/orbit-backend/internal/domain/shared"
 )
 
@@ -38,8 +39,30 @@ func (u *User) SendCoins(to *User, amount uint64) (*SentCoins, error) {
 	return NewSentCoins(u, to, amount), nil
 }
 
+func (u *User) PurchaseBenefit(storeUser *User, benefit *benefit.Benefit) (*PurchasedUserBenefit, error) {
+	var transferUsed uint64
+	var remaining uint64
+	totalCost := benefit.EarnedCost + benefit.TransferredCost
+	totalBalance := u.CoinStatus.EarnedByTransfer + u.CoinStatus.EarnedByActions
+	
+	if totalBalance < totalCost {
+		return nil, ErrInsufficientBalance
+	}
+	
+	if (u.CoinStatus.EarnedByTransfer <= benefit.TransferredCost) {
+		transferUsed = u.CoinStatus.EarnedByTransfer
+	} else {
+		transferUsed = benefit.TransferredCost
+	}
+	
+	remaining = totalCost - transferUsed
+	u.CoinStatus.EarnedByTransfer -= transferUsed
+	u.CoinStatus.EarnedByActions -= remaining
+	return NewPurchasedUserBenefit(u, benefit, remaining, transferUsed), nil;
+}
+
 func (u *User) ReceiveCoins(from *User, amount uint64) (*ReceivedCoins, error) {
-	u.CoinStatus.EarnedByActions += amount
+	u.CoinStatus.EarnedByTransfer += amount
 
 	return NewReceivedCoins(from, u, amount), nil
 }

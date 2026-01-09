@@ -12,6 +12,14 @@ type TransferDTO struct {
 	Amount uint64
 }
 
+func NewTransferDTO(from, to string, amount uint64) *TransferDTO {
+	return &TransferDTO{
+		From:	from,
+		To:		to,
+		Amount: amount,
+	}
+}
+
 type BlockchainGateway interface {
 	PublishUserAction(ctx context.Context, payload *UserGoodAction)
 	TransferListener(ctx context.Context, handler func(event TransferDTO)) error
@@ -51,4 +59,32 @@ type Api42Gateway interface {
 
 type ApiGoogleGateway interface {
 	GetRetroativePresencesBy42ID(ID42 string) ([]UserPresenceInEventDTO, error)
+}
+
+type UserBenefitPurchaseDTO struct {
+	ID                   string						`json:"id" bson:"_id"`
+	UserID               string						`json:"user_id" bson:"user_id"`
+	Username             string						`json:"username" bson:"username"`
+	BenefitID            string						`json:"benefit_id" bson:"benefit_id"`
+	BenefitName          string						`json:"benefit_name" bson:"benefit_name"`
+	EarnedCoinsUsed      uint64						`json:"earned_coins_used" bson:"earned_coins_used"`
+	TransferredCoinsUsed uint64						`json:"transferred_coins_used" bson:"transferred_coins_used"`
+	PurchaseStatus       UserBenefitPurchaseStatus	`json:"purchase_status" bson:"purchase_status"`
+	RequestedAt          string						`json:"requested_at" bson:"requested_at"`
+	UpdatedAt            string						`json:"updated_at" bson:"updated_at"`
+}
+
+func NewUserBenefitPurchaseDTO(purchase UserBenefitPurchase) *UserBenefitPurchaseDTO {
+	return &UserBenefitPurchaseDTO {
+		ID:						purchase.ID.Hex(),
+		UserID:					purchase.UserID,
+		Username:				purchase.Username,
+		BenefitID:				purchase.BenefitID,
+		BenefitName:			purchase.BenefitName,
+		EarnedCoinsUsed:		purchase.EarnedCoinsUsed,
+		TransferredCoinsUsed:	purchase.TransferredCoinsUsed,
+		PurchaseStatus:			purchase.PurchaseStatus,
+		RequestedAt:			purchase.RequestedAt.String(),
+		UpdatedAt:				purchase.UpdatedAt.String(),
+	}
 }
